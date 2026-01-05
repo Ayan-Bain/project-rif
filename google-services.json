@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "924988303048",
+    "project_id": "project-rif",
+    "storage_bucket": "project-rif.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:924988303048:android:f2068aef2c65b37a3da7fd",
+        "android_client_info": {
+          "package_name": "com.abtheinvador18.ProjectRIF"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "924988303048-b0kft3dlffvh7ejrimpfkd616u16tvm3.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyALrrm-kX24dOw5mYhbKo2K2NVr-WQ-T2c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "924988303048-5grleknnej9l2chrm11mdaviua17q5nd.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
