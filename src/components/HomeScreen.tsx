@@ -1,16 +1,24 @@
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, Button } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { GoogleSignin, statusCodes, isSuccessResponse, isErrorWithCode } from '@react-native-google-signin/google-signin';
-import { getAuth, GoogleAuthProvider, signInWithCredential, onAuthStateChanged} from '@react-native-firebase/auth';
-import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry';
+import { View, Text, StyleSheet, Button, ActivityIndicator } from 'react-native';
+import { statusCodes, isErrorWithCode } from '@react-native-google-signin/google-signin';
+import { getAuth, onAuthStateChanged} from '@react-native-firebase/auth';
+import {
+  getFirestore,
+  collection,
+  doc,
+  addDoc,
+  setDoc,
+  getDocs,
+  updateDoc,
+  deleteDoc,
+  query,
+  where,
+} from "@react-native-firebase/firestore";
+import { signInWithGoogle, signOutFromGoogle } from './services/AuthHandler';
 
 const HomeScreen: React.FC=  () => {
     const [userInfo, setUserInfo] = React.useState<any>(null);
-    GoogleSignin.configure({
-        webClientId: '924988303048-5grleknnej9l2chrm11mdaviua17q5nd.apps.googleusercontent.com',
-        scopes: ['profile', 'email'],
-    })
+    const [isLoading, setIsLoading] = React.useState<boolean>(true);
 
 useEffect(() => {
     const auth = getAuth();
@@ -22,23 +30,16 @@ useEffect(() => {
             console.log('No user is signed in.');
             setUserInfo(null);
         }
+        setIsLoading(false);
     });
 
     return () => unsubscribe();
 }, []);
 
 const signIn = async () => {
-        try {
-            await GoogleSignin.hasPlayServices();
-            const response = await GoogleSignin.signIn();
-            if(isSuccessResponse(response)){
-                setUserInfo(JSON.parse(JSON.stringify(response.data)));
-                console.log('Google Sign-In successful', response.data);
-                connectFirebase(response.data.idToken, 'sign in');
-            }
-            else {
-                console.log('Google Sign-In was not successful');
-            }
+    setIsLoading(true);    
+    try {
+            await signInWithGoogle();
         }
         catch (error) {
           if (isErrorWithCode(error)) {
@@ -60,30 +61,13 @@ const signIn = async () => {
 
 }
 
-const connectFirebase = async (idToken: string, method: string) => {
-    try {
-        // console.log("Is Firebase ready?", getApps().length > 0 ? "Yes" : "No");
-            console.log('Code reached here by', method);
-        const googleCredential = GoogleAuthProvider.credential(idToken);
-        // console.log('google credential', googleCredential);
-        // console.log('code reaches here');
-        const authInstance = getAuth();
-        console.log('auth instance retrieved');
-        const userCredential = await signInWithCredential(authInstance, googleCredential);
-        console.log('Firebase Sign-In successful', userCredential.user.displayName);
-    }
-    catch (error) {
-        console.log('Error during Firebase Sign-In', error);
-    }
+if(isLoading) {
+    return(
+        <View style={styles.container}>
+            <ActivityIndicator size={100}/>
+        </View>
+    )
 }
-
-
-    const signOut = async ()=> {
-        await AsyncStorage.removeItem('@user');
-        await GoogleSignin.signOut();
-        setUserInfo(null);
-    }
-
     return(
         <View style={styles.container}>
             <Text>Home Screen</Text>
@@ -93,7 +77,7 @@ const connectFirebase = async (idToken: string, method: string) => {
             {userInfo && (
                 <View>
                     <Text>Welcome, {userInfo.displayName}</Text>
-                <Button title='Sign out' onPress={()=> signOut()} disabled={userInfo === null}/>
+                <Button title='Sign out' onPress={()=> signOutFromGoogle()} disabled={userInfo === null}/>
                 </View>
             )}
         </View>
