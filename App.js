@@ -4,13 +4,14 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import HomeScreen from './src/components/HomeScreen';
 import Details from './src/components/Details';
 import { Ionicons } from '@expo/vector-icons';
-
+import { AuthProvider } from './src/components/services/AuthHandler';
 
 
 const Tab = createBottomTabNavigator();
 
 export default function App() {
   return (
+    <AuthProvider>
     <NavigationContainer>
       <Tab.Navigator
         initialRouteName="My Subscriptions"
@@ -44,6 +45,7 @@ export default function App() {
         />
       </Tab.Navigator>
     </NavigationContainer>
+    </AuthProvider>
   );
 }
 

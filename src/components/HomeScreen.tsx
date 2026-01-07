@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, Button, ActivityIndicator } from 'react-native';
-import { statusCodes, isErrorWithCode } from '@react-native-google-signin/google-signin';
-import { getAuth, onAuthStateChanged} from '@react-native-firebase/auth';
+import { StatusBar } from 'react-native';
+import React from 'react';
+import { View, Text, StyleSheet, Button, ActivityIndicator, Image } from 'react-native';
+import { useAuth } from './services/AuthHandler';
 import {
   getFirestore,
   collection,
@@ -14,81 +14,90 @@ import {
   query,
   where,
 } from "@react-native-firebase/firestore";
-import { signInWithGoogle, signOutFromGoogle } from './services/AuthHandler';
+import AccountStatus from './AccountStatus';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const HomeScreen: React.FC=  () => {
-    const [userInfo, setUserInfo] = React.useState<any>(null);
-    const [isLoading, setIsLoading] = React.useState<boolean>(true);
+    const { isLoading} = useAuth();
 
-useEffect(() => {
-    const auth = getAuth();
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-        if (user) {
-            // console.log('User is signed in:', user.displayName);
-            setUserInfo(user);
-        } else {
-            console.log('No user is signed in.');
-            setUserInfo(null);
-        }
-        setIsLoading(false);
-    });
+// useEffect(() => {
+//     const auth = getAuth();
+//     const unsubscribe = onAuthStateChanged(auth, (user) => {
+//         if (user) {
+//             // console.log('User is signed in:', user.displayName);
+//             setUserInfo(user);
+//             console.log('User info:', user);
+//         } else {
+//             console.log('No user is signed in.');
+//             setUserInfo(null);
+//         }
+//         setIsLoading(false);
+//     });
 
-    return () => unsubscribe();
-}, []);
+//     return () => unsubscribe();
+// }, []);
 
-const signIn = async () => {
-    setIsLoading(true);    
-    try {
-            await signInWithGoogle();
-        }
-        catch (error) {
-          if (isErrorWithCode(error)) {
-            switch (error.code) {
-              case statusCodes.IN_PROGRESS:
-                console.log("Sign-in is in progress already");
-                break;
-              case statusCodes.PLAY_SERVICES_NOT_AVAILABLE:
-                console.log("Play services not available or outdated");
-                break;
-            }
-          } else {
-            console.log(
-              "An unknown error occurred during Google Sign-In",
-              error
-            );
-          }
-        }
+// const signIn = async () => {
+//     setIsLoading(true);    
+//     try {
+//             const checker = await signInWithGoogle();
+//             if(!checker) {
+//                 setUserInfo(null);
+//                 setIsLoading(false);
+//             }
+//         }
+//         catch (error) {
+//           if (isErrorWithCode(error)) {
+//             switch (error.code) {
+//               case statusCodes.IN_PROGRESS:
+//                 console.log("Sign-in is in progress already");
+//                 break;
+//               case statusCodes.PLAY_SERVICES_NOT_AVAILABLE:
+//                 console.log("Play services not available or outdated");
+//                 break;
+//             }
+//           } else {
+//             console.log(
+//               "An unknown error occurred during Google Sign-In",
+//               error
+//             );
+//           }
+//         }
 
-}
+// }
 
 if(isLoading) {
     return(
-        <View style={styles.container}>
+        <SafeAreaView style={[styles.container,{justifyContent: 'center'}]}>
+            <StatusBar barStyle="dark-content" />
             <ActivityIndicator size={100}/>
-        </View>
+        </SafeAreaView>
     )
 }
-    return(
-        <View style={styles.container}>
-            <Text>Home Screen</Text>
-            {!userInfo && (
-        <Button title='Sign in with Google' onPress={() => signIn()}/>
-                )}
-            {userInfo && (
-                <View>
-                    <Text>Welcome, {userInfo.displayName}</Text>
-                <Button title='Sign out' onPress={()=> signOutFromGoogle()} disabled={userInfo === null}/>
-                </View>
-            )}
+    return (
+      <SafeAreaView style={styles.container}>
+        <StatusBar barStyle="dark-content" />
+        <View
+          style={{
+            justifyContent: "flex-start",
+            alignItems: "flex-end",
+            marginRight: "2%",
+          }}
+        >
+          <AccountStatus />
         </View>
-    )
+        <View style={{ alignItems: "center", marginTop: "15%" }}>
+          <Text>This is the list of Subscriptions</Text>
+        </View>
+      </SafeAreaView>
+    );
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
+        // justifyContent: 'center',
+        // alignItems: 'center',
     },
 });
 export default HomeScreen;
