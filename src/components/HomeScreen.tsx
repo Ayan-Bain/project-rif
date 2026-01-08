@@ -15,6 +15,7 @@ const HomeScreen: React.FC=  () => {
     const {data, retrieve} = useData();
     
     useEffect(()=> {
+      setSelectedItem(undefined);
       if(user) {
         retrieve(user.uid);
       }
@@ -59,14 +60,18 @@ const HomeScreen: React.FC=  () => {
       <View style={styles.buttonWrapper}>
         <CustomButton
           title="Add Subscription"
-          onPress={() => setAddSubscription(true)}
+          onPress={() => {
+            setSelectedItem(undefined);
+            setAddSubscription(true)}
+          }
+          backgroundColor='blue'
         />
       </View>
 
       <View style={styles.rowContainer}>
         <Text style={[styles.headerColumn, { flex: 2 }]}>Name</Text>
         <Text style={[styles.headerColumn, { flex: 1 }]}>Price</Text>
-        <Text style={[styles.headerColumn, { flex: 2 }]}>Date</Text>
+        <Text style={[styles.headerColumn, { flex: 2 }]}>Last paid date</Text>
         <Text style={[styles.headerColumn, { flex: 2 }]}>Cycle</Text>
         <View style={{ flex: 1 }} />
       </View>
@@ -153,13 +158,13 @@ const styles = StyleSheet.create({
   },
   headerColumn: {
     fontWeight: 'bold',
-    fontSize: 24, // Reduced from 24 to prevent overlap on smaller screens
+    fontSize: 20, // Reduced from 24 to prevent overlap on smaller screens
     textAlign: 'center',
     color: '#333',
   },
   cellText: {
     textAlign: 'center',
-    fontSize: 18,
+    fontSize: 16,
     color: '#555',
   }
 });

@@ -39,7 +39,7 @@ if(isLoading) {
               source={{ uri: user.photoURL }}
               style={{ width: 50, height: 50, borderRadius: 25 }}
             />
-            <Text style={{ fontSize: 10 }}>{user.displayName}</Text>
+            <Text style={{ fontSize: 14, marginTop: 5 }}>{user.displayName}</Text>
           </TouchableOpacity>
         )}
 

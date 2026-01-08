@@ -1,4 +1,4 @@
-import React, { FC, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import { View, Text, TextInput, StyleSheet, Alert, Platform, TouchableOpacity } from 'react-native';
 import CustomButton from '../custom-components/CustomButton';
 import { useData } from '../services/RetrieveData';
@@ -125,9 +125,9 @@ const [name, setName] = useState(editingItem?.name || '');
             </View>
 
             <CustomButton 
-                title={editingItem? 'Add Subscription': 'Update Subscription'} 
+                title={editingItem? 'Update Subscription':'Add Subscription' } 
                 onPress={handleSave} 
-                backgroundColor="black" 
+                backgroundColor="yellowgreen" 
                 color="white" 
             />
         </View>
