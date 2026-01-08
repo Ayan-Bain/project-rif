@@ -14,7 +14,7 @@ const CustomButton:  React.FC<props> = ({title, onPress, backgroundColor, color,
 
     return (
         <TouchableOpacity onPress={onPress} style={{backgroundColor: backgroundColor || 'black', borderRadius: borderRadius || 10, padding: 10}}>
-            <Text style={{alignItems: 'center', justifyContent: 'center', color: color || 'white', fontSize: 20}}>{title}</Text>
+            <Text style={{textAlign: 'center', justifyContent: 'center', color: color || 'white', fontSize: 20}}>{title}</Text>
         </TouchableOpacity>
     )
 }

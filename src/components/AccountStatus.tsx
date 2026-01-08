@@ -88,11 +88,19 @@ if(isLoading) {
                     source={{ uri: user.photoURL }}
                     style={{ width: 100, height: 100, borderRadius: 50 }}
                   />
-                  <Text style={{marginBottom: 10, fontSize: 18}}>Welcome, {user.displayName}</Text>
-                  <Text style={{marginBottom: 10, fontSize: 18}}>Email ID: {user.email}</Text>
+                  <Text style={{ marginBottom: 10, fontSize: 18 }}>
+                    Welcome, {user.displayName}
+                  </Text>
+                  <Text style={{ marginBottom: 10, fontSize: 18 }}>
+                    Email ID: {user.email}
+                  </Text>
+                  <Text style={{ marginBottom: 10, fontSize: 18 }}>
+                    UID: {user.uid}
+                  </Text>
                   <CustomButton
                     title="Sign out"
-                    onPress={() => signOut()} backgroundColor='#c23030'
+                    onPress={() => signOut()}
+                    backgroundColor="#c23030"
                   />
                 </View>
               )}

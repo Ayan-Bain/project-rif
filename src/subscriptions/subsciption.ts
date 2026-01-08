@@ -4,7 +4,7 @@ interface Subscription {
     id: string;
     name: string;
     price: number;
-    renewalDate: Date;
+    date: string;
     cycle: cycle;
     isActive: boolean;
 }

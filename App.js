@@ -5,6 +5,7 @@ import HomeScreen from './src/components/HomeScreen';
 import Details from './src/components/Details';
 import { Ionicons } from '@expo/vector-icons';
 import { AuthProvider } from './src/components/services/AuthHandler';
+import { DataProvider } from './src/components/services/RetrieveData';
 
 
 const Tab = createBottomTabNavigator();
@@ -12,6 +13,7 @@ const Tab = createBottomTabNavigator();
 export default function App() {
   return (
     <AuthProvider>
+    <DataProvider>
     <NavigationContainer>
       <Tab.Navigator
         initialRouteName="My Subscriptions"
@@ -45,6 +47,7 @@ export default function App() {
         />
       </Tab.Navigator>
     </NavigationContainer>
+    </DataProvider>
     </AuthProvider>
   );
 }
