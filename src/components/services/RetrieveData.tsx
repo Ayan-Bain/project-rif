@@ -89,16 +89,19 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({children}
     const deleteSubscription = async (uid: uidType,id: string ) => {
         try {
             const jsonString = await AsyncStorage.getItem(getStorageKey(uid));
+            if(!jsonString) return;
             const storageData = JSON.parse(jsonString);
-            const newList = storageData.data.filter((item: Subscription)=> {
-                item.id !== id;
-              })
+            const newList = storageData.data.filter((item: Subscription)=> 
+                item.id !== id
+              )
             await AsyncStorage.setItem(
               getStorageKey(uid),
               JSON.stringify({ ...storageData, data: newList
             })
             );
             setData(newList);
+            console.log("Subsciption with ID",id, "is deleted successfully");
+            console.log("New Data:",newList);
         }
         catch (e) {
             console.error('Error in deleting subscription',e);
