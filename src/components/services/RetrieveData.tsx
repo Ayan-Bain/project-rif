@@ -1,7 +1,9 @@
 import React, { createContext, useContext, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import {getFirestore, doc, getDoc, setDoc, serverTimestamp} from '@react-native-firebase/firestore'
 import { useAuth } from './AuthHandler';
 import Subscription from '../../subscriptions/subsciption';
+import { Alert } from 'react-native';
 type uidType = null | string;
 interface dataInputTypePrimitive{
     name: string;
@@ -18,6 +20,11 @@ interface RetriveDataType {
     save?: (uid: uidType, data: dataInputType)=> Promise<void>;
     deleteSubscription?: (uid: uidType, id: string) => Promise<void>;
     update?: (uid: uidType, subscriptionId: string, updatedFields: dataInputType) => Promise<void>;
+    isCloudSyncOn?: boolean;
+    setCloudSyncOn?: (val: boolean) => void;
+    download?: (uid: uidType) => Promise<void>;
+    themeMode?: 'light' | 'dark' | 'system';
+    toggleTheme?: (val: 'light' | 'dark' | 'system') => void;
 };
 
 type cycleType = 'monthly' | 'yearly' | 'weekly';
@@ -28,9 +35,25 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({children}
     const {user} = useAuth();
     const [data, setData] = React.useState<Subscription[]>();
     const [loading, setLoading] = React.useState<boolean>(false);
+    const [isCloudSyncOn, setCloudSyncOn] = React.useState<boolean>(false);
+    const [themeMode, setTheme] = React.useState<'light' | 'dark' | 'system'>('system');
     const getStorageKey = (uid: uidType): string => {
         return (uid ? "@data_" + uid : "@data_guest");
     }
+
+    const toggleTheme = async (mode: 'light' | 'dark' | 'system') => {
+        setTheme(mode);
+        try {
+            await AsyncStorage.setItem('user_theme_preference', mode);
+            console.log('====================================');
+            console.log('Changed theme to',mode);
+            console.log('====================================');
+        }
+        catch (e) {
+            console.error('Error in saving theme preference')
+        }
+    }
+
     const retrieve = async (uid: uidType) => {
         setLoading(true);
         try {
@@ -128,17 +151,96 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({children}
     }
 };
 
+    const uploadToCloud = async (uid: uidType) => {
+        if(user && isCloudSyncOn && data.length>0) {
+            try {
+                const db = getFirestore();
+                const userDocRef = doc(db, 'users',uid);
+                await setDoc(userDocRef, {
+                    subscriptions: data,
+                    lastUpdated: serverTimestamp(),
+                }, {merge: true});
+                console.log('Auto synced to firestore');
+            }
+            catch (e) {
+                console.error('Auto-sync failed')
+            }
+        }
+    }
+
+    const download = async (uid: uidType) => {
+        if(!uid) return;
+        setLoading(true);
+        try {
+            const db = getFirestore();
+            const docum = doc(db, 'users', uid);
+            const docu = await getDoc(docum);
+            if (docu.exists) {
+                const cloudData = docu.data()?.subscriptions || [];
+                const key = getStorageKey(uid);
+                await AsyncStorage.setItem(key, JSON.stringify({uid, data: cloudData}));
+                setData(cloudData);
+                setCloudSyncOn(true);
+                Alert.alert('Cloud Data downloaded successfully');
+            }
+            else {
+                Alert.alert('Data unavailable', 'No data found in the cloud for this account');
+            }
+        }
+        catch (e) {
+            console.error('Cloud download failed', e);
+        }
+        finally {
+            setLoading(false);
+        }
+    }
+
+    useEffect(()=> {
+        if(user) {
+            uploadToCloud(user.uid);
+        }
+    },[data, isCloudSyncOn]);
+
     useEffect(()=> {
         if(user) {
             save(user.uid, null);
         }
     },[user])
 
-    return(
-        <RetrieveData.Provider value={{data, loading, retrieve, save, deleteSubscription, update}}>
-            {children}
-        </RetrieveData.Provider>
-    )
+    useEffect(()=> {
+        const loadTheme = async ()=> {
+            try {
+                const savedTheme = await AsyncStorage.getItem('user_theme_preference');
+                if(savedTheme!==null) {
+                    setTheme(savedTheme as 'light' | 'dark' | 'system');
+                }
+            }
+            catch (e) {
+                console.error('Error loading user theme preference');
+            }
+        }
+        loadTheme();
+    },[])
+
+    return (
+      <RetrieveData.Provider
+        value={{
+          data,
+          loading,
+          retrieve,
+          save,
+          deleteSubscription,
+          update,
+          isCloudSyncOn,
+          setCloudSyncOn,
+          download,
+          themeMode,
+          toggleTheme
+        }}
+      >
+        {children}
+      </RetrieveData.Provider>
+    );
 }
 
 export const useData = () => useContext(RetrieveData);

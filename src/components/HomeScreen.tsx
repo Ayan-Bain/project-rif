@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Modal, StatusBar, View, Text, StyleSheet, ActivityIndicator, FlatList, TouchableOpacity, Alert } from 'react-native';
+import { Modal, StatusBar, View, Text, StyleSheet, ActivityIndicator, FlatList, TouchableOpacity, Alert, useColorScheme } from 'react-native';
 import { useAuth } from './services/AuthHandler';
 import { useData } from './services/RetrieveData';
 import AccountStatus from './AccountStatus';
@@ -9,14 +9,20 @@ import CustomButton from './custom-components/CustomButton';
 import AddSubscriptionForm from './partials/AddSubscriptionForm';
 import Subscription from '../subscriptions/subsciption';
 import renewalDate from './services/RenewalDate';
+import { Colors } from './constants/Colors';
 
 const HomeScreen: React.FC=  () => {
     const [selectedItem, setSelectedItem] = React.useState<Subscription | undefined>(undefined);
     const { isLoading, user,signIn} = useAuth();
     const [addSubscription, setAddSubscription] = React.useState<boolean>(false);
     const [menuVisible, setMenuVisible] = React.useState<boolean>(false);
-    const {data, retrieve, deleteSubscription} = useData();
-    
+    const {data, retrieve, deleteSubscription, themeMode} = useData();
+        const systemScheme = useColorScheme(); //
+        const theme =
+          Colors[themeMode === "system" ? systemScheme || "light" : themeMode];
+      const activeTheme = themeMode === 'system' ? systemScheme : themeMode;
+      const isDark = activeTheme === 'dark';
+
     useEffect(()=> {
       setSelectedItem(undefined);
       if(user) {
@@ -28,7 +34,7 @@ const HomeScreen: React.FC=  () => {
     },[user])
     if(isLoading) {
         return(
-            <SafeAreaView style={[styles.container,{justifyContent: 'center'}]}>
+            <SafeAreaView style={[styles.container,{justifyContent: 'center', backgroundColor: theme.background}]}>
                 <StatusBar barStyle="dark-content" />
                 <ActivityIndicator size={100}/>
             </SafeAreaView>
@@ -54,12 +60,13 @@ const HomeScreen: React.FC=  () => {
 
 
     return (
-      <SafeAreaView style={styles.container}>
-        <StatusBar barStyle="dark-content" />
+      <SafeAreaView style={[styles.container,{backgroundColor: theme.background}]}>
+        <StatusBar barStyle={isDark?"light-content":"dark-content"} />
         <View
           style={{
             justifyContent: "flex-start",
             alignItems: "flex-end",
+            backgroundColor: theme.background,
             marginRight: "2%",
           }}
         >
@@ -81,21 +88,21 @@ const HomeScreen: React.FC=  () => {
                           setSelectedItem(undefined);
                           setAddSubscription(true);
                         }}
-                        backgroundColor="blue"
+                        backgroundColor="#238737"
                       />
                     </View>
 
                     <View style={styles.rowContainer}>
-                      <Text style={[styles.headerColumn, { flex: 2 }]}>
+                      <Text style={[styles.headerColumn, { flex: 2, color: theme.text }]}>
                         Name
                       </Text>
-                      <Text style={[styles.headerColumn, { flex: 2.5 }]}>
+                      <Text style={[styles.headerColumn, { flex: 2.5, color: theme.text }]}>
                         Renewal date
                       </Text>
-                      <Text style={[styles.headerColumn, { flex: 1.5 }]}>
+                      <Text style={[styles.headerColumn, { flex: 1.5, color: theme.text }]}>
                         Cycle
                       </Text>
-                      <Text style={[styles.headerColumn, { flex: 2 }]}>
+                      <Text style={[styles.headerColumn, { flex: 2, color: theme.text }]}>
                         Price
                       </Text>
                       <View style={{ flex: 0.7 }} />
@@ -108,23 +115,23 @@ const HomeScreen: React.FC=  () => {
                       styles.rowContainer,
                       {
                         backgroundColor:
-                          index % 2 == 0 ? "transparent" : "#ceeceaff",
+                          index % 2 == 0 ? "transparent" : theme.whiteBackground,
                       },
                     ]}
                   >
                     <Text
-                      style={[styles.cellText, { flex: 2 }]}
+                      style={[styles.cellText, { flex: 2, color: theme.text }]}
                       numberOfLines={1}
                     >
                       {item.name}
                     </Text>
-                    <Text style={[styles.cellText, { flex: 2.5 }]}>
+                    <Text style={[styles.cellText, { flex: 2.5, color: theme.text }]}>
                       {renewalDate(item.date, item.cycle)}
                     </Text>
-                    <Text style={[styles.cellText, { flex: 1.5 }]}>
+                    <Text style={[styles.cellText, { flex: 1.5, color: theme.text }]}>
                       {item.cycle.charAt(0).toUpperCase() + item.cycle.slice(1)}
                     </Text>
-                    <Text style={[styles.cellText, { flex: 2 }]}>
+                    <Text style={[styles.cellText, { flex: 2, color: theme.text }]}>
                       {item.price}
                     </Text>
                     <View
@@ -142,7 +149,7 @@ const HomeScreen: React.FC=  () => {
     }}
     style={{ padding: 5 }}
   >
-    <Ionicons name="ellipsis-vertical" size={25} color="#555" />
+    <Ionicons name="ellipsis-vertical" size={25} color={isDark?"#FFFFFF":"#555"} />
   </TouchableOpacity>
                     </View>
                   </View>
@@ -162,7 +169,7 @@ const HomeScreen: React.FC=  () => {
                       setSelectedItem(undefined);
                       setAddSubscription(true);
                     }}
-                    backgroundColor="blue"
+                    backgroundColor="#238636"
                   />
                 </View>
                 <View
@@ -179,6 +186,7 @@ const HomeScreen: React.FC=  () => {
                       fontSize: 30,
                       textAlign: "center",
                       lineHeight: 50,
+                      color: theme.text
                     }}
                   >
                     You do not have any subscriptions added yet!
@@ -284,7 +292,6 @@ const styles = StyleSheet.create({
   rowContainer: {
     flexDirection: "row",
     paddingHorizontal: '2%',
-    borderRadius: 20,
     paddingVertical: 12,
     // borderBottomWidth: 1,
     borderColor: '#eee',

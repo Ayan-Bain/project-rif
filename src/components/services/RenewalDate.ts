@@ -1,24 +1,40 @@
-const renewalDate = (date: string, cycle: string) => {
-    const lastDate = new Date(date);
-    if(isNaN(lastDate.getTime())) {
-        return "Invalid Date"
+const renewalDate = (dateString: string, cycle: string) => {
+    // Split the yyyy-mm-dd string to avoid timezone shifts
+    const parts = dateString.split('-');
+    const year = parseInt(parts[0], 10);
+    const month = parseInt(parts[1], 10) - 1; // Months are 0-indexed
+    const day = parseInt(parts[2], 10);
+
+    const lastDate = new Date(year, month, day);
+
+    if (isNaN(lastDate.getTime())) {
+        return "Invalid Date";
     }
 
-    switch (cycle) {
-        case 'weekly': 
-        lastDate.setDate(lastDate.getDate()+7);
-        break;
-        case 'monthly': 
-        lastDate.setMonth(lastDate.getMonth()+1);
-        break;
-        case 'yearly': 
-        lastDate.setFullYear(lastDate.getFullYear()+1);
-        break;
+    // Perform the calculation
+    switch (cycle.toLowerCase()) {
+        case 'weekly':
+            lastDate.setDate(lastDate.getDate() + 7);
+            break;
+        case 'monthly':
+            lastDate.setDate(lastDate.getDate() + 30);
+            break;
+        case 'yearly':
+            lastDate.setFullYear(lastDate.getFullYear() + 1);
+            break;
         default:
-            lastDate.setMonth(lastDate.getMonth()+1);
+            lastDate.setDate(lastDate.getDate() + 30);
     }
-    return lastDate.toISOString().split('T')[0];
 
+    // Helper to pad numbers with a leading zero
+    const pad = (num: number) => num.toString().padStart(2, '0');
+
+    // Return the formatted string without using toISOString()
+    const resYear = lastDate.getFullYear();
+    const resMonth = pad(lastDate.getMonth() + 1);
+    const resDay = pad(lastDate.getDate());
+
+    return `${resYear}-${resMonth}-${resDay}`;
 };
 
 export default renewalDate;

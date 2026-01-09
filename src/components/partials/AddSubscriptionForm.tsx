@@ -1,10 +1,11 @@
 import React, { FC, useEffect, useState } from 'react';
-import { View, Text, TextInput, StyleSheet, Alert, Platform, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, StyleSheet, Alert, Platform, TouchableOpacity, useColorScheme } from 'react-native';
 import CustomButton from '../custom-components/CustomButton';
 import { useData } from '../services/RetrieveData';
 import { useAuth } from '../services/AuthHandler';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker'
 import Subscription from '../../subscriptions/subsciption';
+import { Colors } from '../constants/Colors';
 interface Props {
     editingItem?: Subscription;
     onComplete?: ()=> void;
@@ -12,14 +13,17 @@ interface Props {
 
 const AddSubscriptionForm: React.FC<Props> = ({editingItem, onComplete}) => {
   const { user } = useAuth();
-  const { save, update } = useData();
-const [name, setName] = useState(editingItem?.name || '');
+  const { save, update, themeMode } = useData();
+  const [name, setName] = useState(editingItem?.name || '');
   const [price, setPrice] = useState(editingItem?.price.toString() || '');
   const [cycle, setCycle] = useState(editingItem?.cycle || 'monthly');
   const [dateInfo, setDateInfo] = useState(editingItem ? new Date(editingItem.date) : new Date());
   const [showPicker, setShowPicker] = useState(false);
-
-    const handleSave = async () => {
+  const systemScheme = useColorScheme(); //
+  const theme = Colors[themeMode === 'system' ? (systemScheme || 'light') : themeMode];
+  const activeTheme = themeMode === 'system' ? systemScheme : themeMode;
+  const isDark = activeTheme === 'dark';
+  const handleSave = async () => {
         if (!name || !price) {
             Alert.alert("Error", "Please fill in the name and price");
             return;
@@ -62,31 +66,33 @@ const [name, setName] = useState(editingItem?.name || '');
     };
 
     return (
-        <View style={styles.container}>
-          <Text style={{textAlign: 'center', fontWeight: 'bold', fontSize: 24}}>{editingItem? 'Edit Subscription': 'Add new Subscription'}</Text>
-            <Text style={styles.label}>Subscription Name</Text>
+        <View style={[styles.container,{backgroundColor: theme.background, flex: 1}]}>
+          <Text style={{textAlign: 'center', fontWeight: 'bold', fontSize: 24, color: theme.text}}>{editingItem? 'Edit Subscription': 'Add new Subscription'}</Text>
+            <Text style={[styles.label, {color: theme.text}]}>Subscription Name</Text>
             <TextInput 
-                style={styles.input} 
+                style={[styles.input, {color: theme.text}]} 
                 placeholder="e.g. Netflix" 
+                placeholderTextColor={theme.text}
                 value={name} 
                 onChangeText={setName} 
             />
 
-            <Text style={styles.label}>Price</Text>
+            <Text style={[styles.label, {color: theme.text}]}>Price</Text>
             <TextInput 
-                style={styles.input} 
-                placeholder="0.00" 
+                style={[styles.input, {color: theme.text}]} 
+                placeholder="1.69" 
+                placeholderTextColor={theme.text}
                 keyboardType="numeric" 
                 value={price} 
                 onChangeText={setPrice} 
             />
 
-            <Text style={styles.label}>Last Paid Date (DD/MM/YYYY)</Text>
+            <Text style={[styles.label, {color: theme.text}]}>Last Paid Date (DD/MM/YYYY)</Text>
             <TouchableOpacity 
-                style={styles.dateDisplay} 
+                style={[styles.dateDisplay, {backgroundColor: theme.whiteBackground}]} 
                 onPress={() => setShowPicker(true)}
             >
-                <Text style={styles.dateText}>
+                <Text style={[styles.dateText, {color: theme.text}]}>
                     {dateInfo.toLocaleDateString()} {/* Formats based on user locale */}
                 </Text>
             </TouchableOpacity>
@@ -95,6 +101,7 @@ const [name, setName] = useState(editingItem?.name || '');
             {showPicker && (
                 <DateTimePicker
                     value={dateInfo}
+                    style={{backgroundColor: theme.whiteBackground}}
                     mode="date"
                     display={Platform.OS === 'ios' ? 'inline' : 'default'}
                     onChange={onChange}
@@ -111,7 +118,7 @@ const [name, setName] = useState(editingItem?.name || '');
                 />
             )}
 
-            <Text style={styles.label}>Billing Cycle</Text>
+            <Text style={[styles.label, {color: theme.text}]}>Billing Cycle</Text>
             <View style={styles.cycleContainer}>
                 {['weekly', 'monthly', 'yearly'].map((item) => (
                     <CustomButton
@@ -128,26 +135,30 @@ const [name, setName] = useState(editingItem?.name || '');
                 title={editingItem? 'Update Subscription':'Add Subscription' } 
                 onPress={handleSave} 
                 backgroundColor="yellowgreen" 
-                color="white" 
+                color= {isDark?'black': 'white'}
             />
         </View>
     );
 };
 
 const styles = StyleSheet.create({
-    container: { padding: 20, backgroundColor: 'white', borderRadius: 10 },
-    label: { fontWeight: 'bold', marginTop: 15, marginBottom: 5 },
-    input: { borderWidth: 1, borderColor: '#ddd', padding: 10, borderRadius: 5 },
-    cycleContainer: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 20, marginTop: 10 }, 
-    dateDisplay: {
-        borderWidth: 1,
-        borderColor: '#ddd',
-        padding: 15,
-        borderRadius: 8,
-        backgroundColor: '#f9f9f9',
-        alignItems: 'center'
-    },
-    dateText: { fontSize: 16, color: '#333' }
+  container: { padding: 20, borderRadius: 10 },
+  label: { fontWeight: "bold", marginTop: 15, marginBottom: 5 },
+  input: { borderWidth: 1, borderColor: "#ddd", padding: 10, borderRadius: 5 },
+  cycleContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 20,
+    marginTop: 10,
+  },
+  dateDisplay: {
+    borderWidth: 1,
+    borderColor: "#ddd",
+    padding: 15,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  dateText: { fontSize: 16, color: "#333" },
 });
 
 export default AddSubscriptionForm;
