@@ -53,7 +53,7 @@ const MoreMenu: React.FC<props> = ({visible, setVisible}) => {
               <Text
                 style={{ color: theme.text, textAlign: "center", fontSize: 20 }}
               >
-                Welcome, {user.displayName}
+                {user?'Welcome,':null}{user?.displayName}
               </Text>
               <View
                 style={{

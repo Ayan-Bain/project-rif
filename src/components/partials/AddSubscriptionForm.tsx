@@ -6,7 +6,7 @@ import { useAuth } from '../services/AuthHandler';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker'
 import Subscription from '../../subscriptions/subsciption';
 import { Colors } from '../constants/Colors';
-import { requestNotificationPermission } from '../services/Notifications';
+import { requestNotificationPermission } from '../services/NotificationRegistry';
 interface Props {
     editingItem?: Subscription;
     onComplete?: ()=> void;
@@ -25,9 +25,7 @@ const AddSubscriptionForm: React.FC<Props> = ({editingItem, onComplete}) => {
   const activeTheme = themeMode === 'system' ? systemScheme : themeMode;
   const isDark = activeTheme === 'dark';
   const handleSave = async () => {
-
-    const hasPermission = await requestNotificationPermission();
-    
+        const hasPermission = await requestNotificationPermission();
 
         if (!name || !price) {
             Alert.alert("Error", "Please fill in the name and price");
@@ -71,7 +69,7 @@ const AddSubscriptionForm: React.FC<Props> = ({editingItem, onComplete}) => {
     };
 
     return (
-        <View style={[styles.container,{backgroundColor: theme.background, flex: 1}]}>
+        <View style={[styles.container,{backgroundColor: theme.whiteBackground, flex: 1}]}>
           <Text style={{textAlign: 'center', fontWeight: 'bold', fontSize: 24, color: theme.text}}>{editingItem? 'Edit Subscription': 'Add new Subscription'}</Text>
             <Text style={[styles.label, {color: theme.text}]}>Subscription Name</Text>
             <TextInput 

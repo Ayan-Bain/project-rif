@@ -17,7 +17,7 @@ function AppNavigator() {
   
   const activeTheme = themeMode === "system" ? (systemScheme || "light") : themeMode;
   const theme = Colors[activeTheme];
-
+const isDark = activeTheme === 'dark';
   return (
     <NavigationContainer>
       <Tab.Navigator
@@ -29,7 +29,8 @@ function AppNavigator() {
             backgroundColor: theme.whiteBackground,
             borderTopColor: theme.border,
           },
-          tabBarInactiveTintColor: '#888',
+          tabBarInactiveTintColor: isDark?'#FFF':'#888',
+          tabBarActiveTintColor: '#857ff1',
         }}
       >
         <Tab.Screen
@@ -37,7 +38,7 @@ function AppNavigator() {
           component={HomeScreen}
           options={{
             tabBarIcon: ({ color, size }) => (
-              <Ionicons name="albums-outline" color={color} size={size + 3} />
+              <Ionicons name={isDark?"albums":"albums-outline"} color={color} size={size + 3} />
             ),
           }}
         />
@@ -46,7 +47,7 @@ function AppNavigator() {
           component={Details} 
           options={{
             tabBarIcon: ({ color, size }) => (
-              <Ionicons name="card-outline" color={color} size={size + 3} />
+              <Ionicons name={isDark?"card":"card-outline"} color={color} size={size + 3} />
             ),
           }}
         />

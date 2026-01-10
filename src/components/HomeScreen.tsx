@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { Modal, StatusBar, View, Text, StyleSheet, ActivityIndicator, FlatList, TouchableOpacity, Alert, useColorScheme } from 'react-native';
 import { useAuth } from './services/AuthHandler';
 import { useData } from './services/RetrieveData';
@@ -11,6 +11,7 @@ import Subscription from '../subscriptions/subsciption';
 import renewalDate from './services/RenewalDate';
 import { Colors } from './constants/Colors';
 import MoreMenu from './partials/MoreMenu';
+import { syncNotificationBatch } from './services/NotificationManager';
 
 const HomeScreen: React.FC=  () => {
     const [selectedItem, setSelectedItem] = React.useState<Subscription | undefined>(undefined);
@@ -18,7 +19,7 @@ const HomeScreen: React.FC=  () => {
     const [addSubscription, setAddSubscription] = React.useState<boolean>(false);
     const [menuVisible, setMenuVisible] = React.useState<boolean>(false);
     const [moreMenuVisible, setMoreMenuVisible] = React.useState<boolean>(false);
-    const {data, retrieve, deleteSubscription, themeMode} = useData();
+    const {data, retrieve, deleteSubscription, themeMode, update} = useData();
         const systemScheme = useColorScheme(); //
         const theme =
           Colors[themeMode === "system" ? systemScheme || "light" : themeMode];
@@ -34,6 +35,13 @@ const HomeScreen: React.FC=  () => {
         retrieve(null);
       }
     },[user])
+    
+            const sortedData = useMemo(() => {
+              if(!data) return;
+        return [...data].sort((a, b) => {
+          return new Date(renewalDate(a.date, a.cycle)).getTime() - new Date(renewalDate(b.date, b.cycle)).getTime();
+        });
+      }, [data]);
     if(isLoading) {
         return(
             <SafeAreaView style={[styles.container,{justifyContent: 'center', backgroundColor: theme.background}]}>
@@ -41,12 +49,42 @@ const HomeScreen: React.FC=  () => {
                 <ActivityIndicator size={100}/>
             </SafeAreaView>
         )
+    };
+
+    const isOverdue = (date: string): boolean => {
+      return (new Date(date).getTime() < new Date().setHours(0,0,0,0));
     }
 
     const openEdit = (item: Subscription) => {
       setSelectedItem(item);
       setAddSubscription(true);
     }
+
+  const onMarkPaid = async (sub: Subscription) => {
+  console.log('Marking as paid:', sub.name);
+  
+  const nextDate = renewalDate(sub.date, sub.cycle);
+  const updatedSub = { ...sub, date: nextDate };
+   
+
+  const partial = {
+    name: sub.name, 
+    price: sub.price, 
+    cycle: sub.cycle,
+    date: nextDate // This is now the new renewal date
+  };
+
+  try {
+    await update(user.uid, sub.id, partial);
+    // 5. Refresh data locally so the FlatList re-sorts immediately
+    retrieve(user.uid); 
+    Alert.alert("Success", `${sub.name} marked as paid. Next renewal: ${nextDate}`);
+    
+  } catch (error) {
+    console.error("Update failed:", error);
+    Alert.alert("Error", "Could not update subscription.");
+  }
+};
 
     const handleOptionsMenu = (item: Subscription) => {
           Alert.alert(
@@ -79,6 +117,7 @@ const HomeScreen: React.FC=  () => {
             iconName="menu-outline"
             backgroundColor={theme.background}
             iconSize={30}
+            color={isDark ? null : "black"}
             onPress={() => setMoreMenuVisible(true)}
           />
           <AccountStatus />
@@ -87,7 +126,7 @@ const HomeScreen: React.FC=  () => {
           <View style={{ marginTop: "5%", flex: 1 }}>
             {data && data.length > 0 ? (
               <FlatList
-                data={data}
+                data={sortedData}
                 // keyExtractor={(item) => item.id}
                 ListHeaderComponent={
                   <View style={styles.tableContainer}>
@@ -136,7 +175,7 @@ const HomeScreen: React.FC=  () => {
                       >
                         Price
                       </Text>
-                      <View style={{ flex: 0.7 }} />
+                      <View style={{ flex: 1 }} />
                     </View>
                   </View>
                 }
@@ -149,6 +188,8 @@ const HomeScreen: React.FC=  () => {
                           index % 2 == 0
                             ? "transparent"
                             : theme.whiteBackground,
+                            borderColor: isOverdue(renewalDate(item.date, item.cycle))?'red':null,
+                            borderWidth: isOverdue(renewalDate(item.date, item.cycle))?1:0
                       },
                     ]}
                   >
@@ -181,12 +222,24 @@ const HomeScreen: React.FC=  () => {
                     </Text>
                     <View
                       style={{
-                        flex: 0.7,
+                        flex: 1,
                         marginRight: 10,
                         flexDirection: "row",
                         justifyContent: "space-between",
                       }}
                     >
+                      <TouchableOpacity
+                        onPress={() => {
+                          onMarkPaid(item);
+                        }}
+                        style={{ padding: 5 }}
+                      >
+                        <Ionicons
+                          name="checkmark"
+                          size={25}
+                          color={isDark ? "#FFFFFF" : "#555"}
+                        />
+                      </TouchableOpacity>
                       <TouchableOpacity
                         onPress={() => {
                           setSelectedItem(item);
@@ -327,8 +380,7 @@ const HomeScreen: React.FC=  () => {
           </TouchableOpacity>
         </Modal>
 
-        <MoreMenu visible={moreMenuVisible} setVisible={setMoreMenuVisible}/>
-        
+        <MoreMenu visible={moreMenuVisible} setVisible={setMoreMenuVisible} />
       </SafeAreaView>
     );
 }

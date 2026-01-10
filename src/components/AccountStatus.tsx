@@ -124,7 +124,7 @@ if(isLoading) {
                       Email ID: {user.email}
                     </Text>
                     <Text style={{color: theme.text, marginBottom: 10, fontSize: 18}}>
-                      Number of active subscription{data.length>1?'s':null}: {data.length}
+                      Number of active subscription{data?.length>1?'s':null}: {data?.length}
                     </Text>
                   </View>
                   <View

@@ -4,6 +4,9 @@ import {getFirestore, doc, getDoc, setDoc, serverTimestamp} from '@react-native-
 import { useAuth } from './AuthHandler';
 import Subscription from '../../subscriptions/subsciption';
 import { Alert } from 'react-native';
+import { syncNotificationBatch } from './NotificationManager';
+import { NotificationRegistry } from './NotificationRegistry';
+import * as Notifications from 'expo-notifications'
 type uidType = null | string;
 interface dataInputTypePrimitive{
     name: string;
@@ -45,9 +48,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({children}
         setTheme(mode);
         try {
             await AsyncStorage.setItem('user_theme_preference', mode);
-            console.log('====================================');
             console.log('Changed theme to',mode);
-            console.log('====================================');
         }
         catch (e) {
             console.error('Error in saving theme preference')
@@ -91,26 +92,39 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({children}
     }
 
     const save = async (uid: uidType, data: dataInputType) => {
-        try {
-            const jsonString = await AsyncStorage.getItem(getStorageKey(uid));
-            const storageData = jsonString !== null ? JSON.parse(jsonString) : {uid: uid,data: []};
-            if(storageData.uid === null && uid) {
-                storageData.uid = uid;
-            }
-            if(data) {
-                storageData.data = [...storageData.data, {...data,id: Date.now().toString()}]
-                console.log(storageData);
-                await AsyncStorage.setItem(getStorageKey(uid), JSON.stringify(storageData));
-                setData(storageData.data);
-            }
+    try {
+        const jsonString = await AsyncStorage.getItem(getStorageKey(uid));
+        const storageData = jsonString !== null ? JSON.parse(jsonString) : {uid: uid, data: []};
+        
+        if(data) {
+            const newData: Subscription = {
+                ...data,
+                id: Date.now().toString() 
+            };
+
+            storageData.data = [...storageData.data, newData];
+            await AsyncStorage.setItem(
+              getStorageKey(uid),
+              JSON.stringify(storageData)
+            );
+            console.log(newData);
+            await syncNotificationBatch(newData);
+            setData(storageData.data);
         }
-        catch (e) {
-            console.error('Error in saving data', e);
-        }
+    } catch (e) {
+        console.error('Error in saving data', e);
     }
+}
 
     const deleteSubscription = async (uid: uidType,id: string ) => {
         try {
+            const oldIds = await NotificationRegistry.getNotifIds(id);
+        if (oldIds && Array.isArray(oldIds)) {
+            for (const notifId of oldIds) {
+                await Notifications.cancelScheduledNotificationAsync(notifId);
+            }
+        }
+
             const jsonString = await AsyncStorage.getItem(getStorageKey(uid));
             if(!jsonString) return;
             const storageData = JSON.parse(jsonString);
@@ -134,18 +148,22 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({children}
 
     const update = async (uid: uidType, subscriptionId: string, updatedFields: dataInputType) => {
     try {
-        const jsonString = await AsyncStorage.getItem(getStorageKey(uid));
-        if (!jsonString) return;
+      const jsonString = await AsyncStorage.getItem(getStorageKey(uid));
+      if (!jsonString) return;
 
-        const storageData = JSON.parse(jsonString);
+      const storageData = JSON.parse(jsonString);
 
-        const updatedList = storageData.data.map((item: Subscription) => 
-            item.id === subscriptionId ? { ...item, ...updatedFields } : item
-        );
-
-        await AsyncStorage.setItem(getStorageKey(uid), JSON.stringify({ ...storageData, data: updatedList }));
-        setData(updatedList);
-        console.log("Subscription updated!");
+      const updatedList = storageData.data.map((item: Subscription) =>
+        item.id === subscriptionId ? { ...item, ...updatedFields } : item
+      );
+      const newData: Subscription = { id: subscriptionId, ...updatedFields };
+      await syncNotificationBatch(newData);
+      await AsyncStorage.setItem(
+        getStorageKey(uid),
+        JSON.stringify({ ...storageData, data: updatedList })
+      );
+      setData(updatedList);
+      console.log("Subscription updated!");
     } catch (e) {
         console.error("Update Error", e);
     }
@@ -177,8 +195,27 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({children}
             const docu = await getDoc(docum);
             if (docu.exists) {
                 const cloudData = docu.data()?.subscriptions || [];
+
                 const key = getStorageKey(uid);
                 await AsyncStorage.setItem(key, JSON.stringify({uid, data: cloudData}));
+                if(data.length>cloudData.length) {
+                    Alert.alert(
+                      "Confirmation to overwrite local data",
+                      "Are you sure you want to overwrite local data with cloud data ?",
+                      [
+                        { text: "Cancel", style: "cancel" },
+                        {
+                          text: "Delete",
+                          style: "destructive",
+                          onPress: () => {
+                                setData(cloudData);
+                                setCloudSyncOn(true);
+                                Alert.alert("Cloud Data downloaded successfully");            
+                          },
+                        },
+                      ]
+                    );
+                }
                 setData(cloudData);
                 setCloudSyncOn(true);
                 Alert.alert('Cloud Data downloaded successfully');

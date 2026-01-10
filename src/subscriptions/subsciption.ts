@@ -6,7 +6,6 @@ interface Subscription {
     price: number;
     date: string;
     cycle: cycle;
-    isActive: boolean;
 }
 
 export default Subscription;
