@@ -11,7 +11,6 @@ import Subscription from '../subscriptions/subsciption';
 import renewalDate from './services/RenewalDate';
 import { Colors } from './constants/Colors';
 import MoreMenu from './partials/MoreMenu';
-import { syncNotificationBatch } from './services/NotificationManager';
 
 const HomeScreen: React.FC=  () => {
     const [selectedItem, setSelectedItem] = React.useState<Subscription | undefined>(undefined);

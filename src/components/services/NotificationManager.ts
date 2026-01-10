@@ -3,6 +3,7 @@ import * as Notifications from 'expo-notifications';
 import { NotificationRegistry } from './NotificationRegistry';
 import Subscription from '../../subscriptions/subsciption';
 import renewalDate from './RenewalDate';
+import { useData } from './RetrieveData';
 
 Notifications.setNotificationHandler({
 handleNotification: async () => ({
@@ -13,7 +14,7 @@ shouldSetBadge: false,
 }),
 });
 
-export const syncNotificationBatch = async (sub: Subscription) => {
+export const syncNotificationBatch = async (sub: Subscription, daysBefore: number) => {
   const oldIds = await NotificationRegistry.getNotifIds(sub.id);
   if (oldIds && Array.isArray(oldIds)) {
     for (const id of oldIds) {
@@ -23,7 +24,7 @@ export const syncNotificationBatch = async (sub: Subscription) => {
   const newIds: string[] = [];
   const [y, m, d] = renewalDate(sub.date, sub.cycle).split('-').map(Number);
   const dueDate = new Date(y, m-1 , d, 18, 35, 0);
-  for (let i = 3; i >= 0; i--) {
+  for (let i = daysBefore; i >= 0; i--) {
     const triggerDate = new Date(dueDate);
     triggerDate.setDate(dueDate.getDate() - i);
     if (triggerDate.getTime() > Date.now()) {

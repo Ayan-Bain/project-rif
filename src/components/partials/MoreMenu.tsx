@@ -11,7 +11,7 @@ interface props  {
 
 const MoreMenu: React.FC<props> = ({visible, setVisible}) => {
     const {user} = useAuth();
-    const {themeMode, toggleTheme, isCloudSyncOn, setCloudSyncOn} = useData();
+    const {themeMode, toggleTheme, isCloudSyncOn, setCloudSyncOn, days, setDays} = useData();
 
     const systemScheme = useColorScheme(); //
             const theme =
@@ -143,6 +143,62 @@ const MoreMenu: React.FC<props> = ({visible, setVisible}) => {
                       size={20}
                       color={themeMode === "system" ? "#2196F3" : "#888"}
                     />
+                  </TouchableOpacity>
+                </View>
+              </View>
+              <View
+                style={{
+                  flexDirection: "row",
+                  marginTop: 50,
+                  justifyContent: "space-between",
+                  // width: "100%",
+                  paddingHorizontal: 20,
+                }}
+              >
+                <Text
+                  style={[styles.userText, { color: isDark ? "#fff" : "#000" }]}
+                >
+                  Days before alert
+                </Text>
+
+                <View
+                  style={[
+                    styles.themeToggleRow,
+                    {
+                      backgroundColor: isDark
+                        ? theme.background
+                        : styles.themeToggleRow.backgroundColor,
+                    },
+                  ]}
+                >
+                  <TouchableOpacity
+                    onPress={() => setDays(3)}
+                    style={[
+                      styles.iconBtn,
+                      days===3 && styles.activeBtn,
+                    ]}
+                  >
+                    <Text style={{color: themeMode === "light" ? "#2196F3" : "#888"}}>3</Text>
+                  </TouchableOpacity>
+
+                  {/* Dark Mode Button */}
+                  <TouchableOpacity
+                    onPress={() => setDays(5)}
+                    style={[
+                      styles.iconBtn,
+                      days===5 && styles.activeBtn,
+                    ]}
+                  >
+                    <Text style={{color: themeMode === "light" ? "#2196F3" : "#888"}}>5</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => setDays(7)}
+                    style={[
+                      styles.iconBtn,
+                      days===7 && styles.activeBtn,
+                    ]}
+                  >
+                    <Text style={{color: themeMode === "light" ? "#2196F3" : "#888"}}>7</Text>
                   </TouchableOpacity>
                 </View>
               </View>
