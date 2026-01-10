@@ -22,6 +22,7 @@
         "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#ffffff"
       },
+      "permissions": ["NOTIFICATIONS"],
       "edgeToEdgeEnabled": true,
       "package": "com.abtheinvador18.ProjectRIF"
     },

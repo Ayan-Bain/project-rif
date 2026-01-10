@@ -6,6 +6,7 @@ import { useAuth } from '../services/AuthHandler';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker'
 import Subscription from '../../subscriptions/subsciption';
 import { Colors } from '../constants/Colors';
+import { requestNotificationPermission } from '../services/Notifications';
 interface Props {
     editingItem?: Subscription;
     onComplete?: ()=> void;
@@ -24,6 +25,10 @@ const AddSubscriptionForm: React.FC<Props> = ({editingItem, onComplete}) => {
   const activeTheme = themeMode === 'system' ? systemScheme : themeMode;
   const isDark = activeTheme === 'dark';
   const handleSave = async () => {
+
+    const hasPermission = await requestNotificationPermission();
+    
+
         if (!name || !price) {
             Alert.alert("Error", "Please fill in the name and price");
             return;

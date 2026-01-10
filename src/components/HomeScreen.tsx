@@ -10,12 +10,14 @@ import AddSubscriptionForm from './partials/AddSubscriptionForm';
 import Subscription from '../subscriptions/subsciption';
 import renewalDate from './services/RenewalDate';
 import { Colors } from './constants/Colors';
+import MoreMenu from './partials/MoreMenu';
 
 const HomeScreen: React.FC=  () => {
     const [selectedItem, setSelectedItem] = React.useState<Subscription | undefined>(undefined);
     const { isLoading, user,signIn} = useAuth();
     const [addSubscription, setAddSubscription] = React.useState<boolean>(false);
     const [menuVisible, setMenuVisible] = React.useState<boolean>(false);
+    const [moreMenuVisible, setMoreMenuVisible] = React.useState<boolean>(false);
     const {data, retrieve, deleteSubscription, themeMode} = useData();
         const systemScheme = useColorScheme(); //
         const theme =
@@ -60,16 +62,25 @@ const HomeScreen: React.FC=  () => {
 
 
     return (
-      <SafeAreaView style={[styles.container,{backgroundColor: theme.background}]}>
-        <StatusBar barStyle={isDark?"light-content":"dark-content"} />
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: theme.background }]}
+      >
+        <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
         <View
           style={{
-            justifyContent: "flex-start",
-            alignItems: "flex-end",
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "stretch",
             backgroundColor: theme.background,
-            marginRight: "2%",
+            marginHorizontal: "3%",
           }}
         >
+          <CustomButton
+            iconName="menu-outline"
+            backgroundColor={theme.background}
+            iconSize={30}
+            onPress={() => setMoreMenuVisible(true)}
+          />
           <AccountStatus />
         </View>
         {user && (
@@ -93,16 +104,36 @@ const HomeScreen: React.FC=  () => {
                     </View>
 
                     <View style={styles.rowContainer}>
-                      <Text style={[styles.headerColumn, { flex: 2, color: theme.text }]}>
+                      <Text
+                        style={[
+                          styles.headerColumn,
+                          { flex: 2, color: theme.text },
+                        ]}
+                      >
                         Name
                       </Text>
-                      <Text style={[styles.headerColumn, { flex: 2.5, color: theme.text }]}>
+                      <Text
+                        style={[
+                          styles.headerColumn,
+                          { flex: 2.5, color: theme.text },
+                        ]}
+                      >
                         Renewal date
                       </Text>
-                      <Text style={[styles.headerColumn, { flex: 1.5, color: theme.text }]}>
+                      <Text
+                        style={[
+                          styles.headerColumn,
+                          { flex: 1.5, color: theme.text },
+                        ]}
+                      >
                         Cycle
                       </Text>
-                      <Text style={[styles.headerColumn, { flex: 2, color: theme.text }]}>
+                      <Text
+                        style={[
+                          styles.headerColumn,
+                          { flex: 2, color: theme.text },
+                        ]}
+                      >
                         Price
                       </Text>
                       <View style={{ flex: 0.7 }} />
@@ -115,7 +146,9 @@ const HomeScreen: React.FC=  () => {
                       styles.rowContainer,
                       {
                         backgroundColor:
-                          index % 2 == 0 ? "transparent" : theme.whiteBackground,
+                          index % 2 == 0
+                            ? "transparent"
+                            : theme.whiteBackground,
                       },
                     ]}
                   >
@@ -125,13 +158,25 @@ const HomeScreen: React.FC=  () => {
                     >
                       {item.name}
                     </Text>
-                    <Text style={[styles.cellText, { flex: 2.5, color: theme.text }]}>
+                    <Text
+                      style={[
+                        styles.cellText,
+                        { flex: 2.5, color: theme.text },
+                      ]}
+                    >
                       {renewalDate(item.date, item.cycle)}
                     </Text>
-                    <Text style={[styles.cellText, { flex: 1.5, color: theme.text }]}>
+                    <Text
+                      style={[
+                        styles.cellText,
+                        { flex: 1.5, color: theme.text },
+                      ]}
+                    >
                       {item.cycle.charAt(0).toUpperCase() + item.cycle.slice(1)}
                     </Text>
-                    <Text style={[styles.cellText, { flex: 2, color: theme.text }]}>
+                    <Text
+                      style={[styles.cellText, { flex: 2, color: theme.text }]}
+                    >
                       {item.price}
                     </Text>
                     <View
@@ -142,15 +187,19 @@ const HomeScreen: React.FC=  () => {
                         justifyContent: "space-between",
                       }}
                     >
-                      <TouchableOpacity 
-    onPress={() => {
-      setSelectedItem(item);
-      setMenuVisible(true);
-    }}
-    style={{ padding: 5 }}
-  >
-    <Ionicons name="ellipsis-vertical" size={25} color={isDark?"#FFFFFF":"#555"} />
-  </TouchableOpacity>
+                      <TouchableOpacity
+                        onPress={() => {
+                          setSelectedItem(item);
+                          setMenuVisible(true);
+                        }}
+                        style={{ padding: 5 }}
+                      >
+                        <Ionicons
+                          name="ellipsis-vertical"
+                          size={25}
+                          color={isDark ? "#FFFFFF" : "#555"}
+                        />
+                      </TouchableOpacity>
                     </View>
                   </View>
                 )}
@@ -186,7 +235,7 @@ const HomeScreen: React.FC=  () => {
                       fontSize: 30,
                       textAlign: "center",
                       lineHeight: 50,
-                      color: theme.text
+                      color: theme.text,
                     }}
                   >
                     You do not have any subscriptions added yet!
@@ -225,7 +274,7 @@ const HomeScreen: React.FC=  () => {
               style={{ flex: 1 }}
               onPress={() => setAddSubscription(false)}
             ></TouchableOpacity>
-            <View style={{ height: "70%", backgroundColor: "white" }}>
+            <View style={{ height: "70%" }}>
               <AddSubscriptionForm
                 editingItem={selectedItem}
                 onComplete={() => {
@@ -238,38 +287,48 @@ const HomeScreen: React.FC=  () => {
         </Modal>
 
         <Modal visible={menuVisible} transparent={true} animationType="fade">
-  {/* Transparent overlay to close menu when clicking outside */}
-  <TouchableOpacity 
-    style={styles.modalOverlay} 
-    activeOpacity={1} 
-    onPress={() => setMenuVisible(false)}
-  >
-    <View style={styles.overflowMenu}>
-      <Text style={[styles.menuText,{textAlign: 'center', fontWeight: 'bold', fontSize: 20}]}>{selectedItem?.name}</Text>
-      <TouchableOpacity 
-        style={styles.menuOption} 
-        onPress={() => {
-          setMenuVisible(false);
-          if (selectedItem) openEdit(selectedItem);
-        }}
-      >
-        <Ionicons name="create-outline" size={20} color="green" />
-        <Text style={styles.menuText}>Edit</Text>
-      </TouchableOpacity>
+          {/* Transparent overlay to close menu when clicking outside */}
+          <TouchableOpacity
+            style={styles.modalOverlay}
+            activeOpacity={1}
+            onPress={() => setMenuVisible(false)}
+          >
+            <View style={styles.overflowMenu}>
+              <Text
+                style={[
+                  styles.menuText,
+                  { textAlign: "center", fontWeight: "bold", fontSize: 20 },
+                ]}
+              >
+                {selectedItem?.name}
+              </Text>
+              <TouchableOpacity
+                style={styles.menuOption}
+                onPress={() => {
+                  setMenuVisible(false);
+                  if (selectedItem) openEdit(selectedItem);
+                }}
+              >
+                <Ionicons name="create-outline" size={20} color="green" />
+                <Text style={styles.menuText}>Edit</Text>
+              </TouchableOpacity>
 
-      <TouchableOpacity 
-        style={[styles.menuOption, { borderBottomWidth: 0 }]} 
-        onPress={() => {
-          setMenuVisible(false);
-          if (selectedItem) handleOptionsMenu(selectedItem);
-        }}
-      >
-        <Ionicons name="trash-outline" size={20} color="red" />
-        <Text style={[styles.menuText, { color: 'red' }]}>Delete</Text>
-      </TouchableOpacity>
-    </View>
-  </TouchableOpacity>
-</Modal>
+              <TouchableOpacity
+                style={[styles.menuOption, { borderBottomWidth: 0 }]}
+                onPress={() => {
+                  setMenuVisible(false);
+                  if (selectedItem) handleOptionsMenu(selectedItem);
+                }}
+              >
+                <Ionicons name="trash-outline" size={20} color="red" />
+                <Text style={[styles.menuText, { color: "red" }]}>Delete</Text>
+              </TouchableOpacity>
+            </View>
+          </TouchableOpacity>
+        </Modal>
+
+        <MoreMenu visible={moreMenuVisible} setVisible={setMoreMenuVisible}/>
+        
       </SafeAreaView>
     );
 }
