@@ -7,6 +7,7 @@ import { Alert } from 'react-native';
 import { syncNotificationBatch } from './NotificationManager';
 import { NotificationRegistry } from './NotificationRegistry';
 import * as Notifications from 'expo-notifications'
+import { getBrandMetadata } from './DetailsHelper';
 type uidType = null | string;
 interface dataInputTypePrimitive{
     name: string;
@@ -114,30 +115,39 @@ const setDays = async (mode: number) => {
         }
     }
 
-    const save = async (uid: uidType, data: dataInputType) => {
+    const save = async (uid: uidType, input: dataInputType) => {
+    if (!input) return;
     try {
-        const jsonString = await AsyncStorage.getItem(getStorageKey(uid));
-        const storageData = jsonString !== null ? JSON.parse(jsonString) : {uid: uid, data: []};
-        
-        if(data) {
-            const newData: Subscription = {
-                ...data,
-                id: Date.now().toString() 
-            };
-
-            storageData.data = [...storageData.data, newData];
-            await AsyncStorage.setItem(
-              getStorageKey(uid),
-              JSON.stringify(storageData)
-            );
-            console.log(newData);
+        const storageKey = getStorageKey(uid);
+        const jsonString = await AsyncStorage.getItem(storageKey);
+        const storageData = jsonString ? JSON.parse(jsonString) : { uid, data: [] };
+        const newData: Subscription = {
+            ...input,
+            id: Date.now().toString(),
+            category: 'other', // Placeholder
+            logo: null
+        };
+        const optimisticList = [...(storageData.data || []), newData];
+        setData(optimisticList);
+        await AsyncStorage.setItem(storageKey, JSON.stringify({ ...storageData, data: optimisticList }));
+        getBrandMetadata(input.name).then(async (metadata) => {
+            const finalData = { ...newData, ...metadata };
+            setData(current => current?.map(item => item.id === newData.id ? finalData : item));
+            const latestJson = await AsyncStorage.getItem(storageKey);
+            const latestStorage = latestJson ? JSON.parse(latestJson) : storageData;
+            latestStorage.data = latestStorage.data.map((item: any) => item.id === newData.id ? finalData : item);
+            console.log('====================================');
+            console.log(latestStorage);
+            console.log('====================================');
+            await AsyncStorage.setItem(storageKey, JSON.stringify(latestStorage));
+            await syncNotificationBatch(finalData, days);
+        }).catch(async () => {
             await syncNotificationBatch(newData, days);
-            setData(storageData.data);
-        }
+        });
     } catch (e) {
-        console.error('Error in saving data', e);
+        console.error('Save Error:', e);
     }
-}
+};
 
 const deleteSubscription = async (uid: uidType,id: string ) => {
     try {
@@ -169,25 +179,44 @@ const deleteSubscription = async (uid: uidType,id: string ) => {
 
 
     const update = async (uid: uidType, subscriptionId: string, updatedFields: dataInputType) => {
+    if (!updatedFields) return;
     try {
-      const jsonString = await AsyncStorage.getItem(getStorageKey(uid));
-      if (!jsonString) return;
+        const storageKey = getStorageKey(uid);
+        const jsonString = await AsyncStorage.getItem(storageKey);
+        if (!jsonString) return;
 
-      const storageData = JSON.parse(jsonString);
+        const storageData = JSON.parse(jsonString);
+        const originalItem = storageData.data.find((i: Subscription) => i.id === subscriptionId);
+        
+        // 1. Optimistic Update (UI)
+        const updatedItem = { ...originalItem, ...updatedFields };
+        const updatedList = storageData.data.map((item: Subscription) =>
+            item.id === subscriptionId ? updatedItem : item
+        );
+        setData(updatedList);
 
-      const updatedList = storageData.data.map((item: Subscription) =>
-        item.id === subscriptionId ? { ...item, ...updatedFields } : item
-      );
-      const newData: Subscription = { id: subscriptionId, ...updatedFields };
-      await syncNotificationBatch(newData, days);
-      await AsyncStorage.setItem(
-        getStorageKey(uid),
-        JSON.stringify({ ...storageData, data: updatedList })
-      );
-      setData(updatedList);
-      console.log("Subscription updated!");
+        // 2. If name changed, trigger background metadata refresh
+        if (updatedFields.name !== originalItem.name) {
+            getBrandMetadata(updatedFields.name).then(async (metadata) => {
+                const enhancedItem = { ...updatedItem, ...metadata };
+                // Update storage with enhanced metadata
+                const latest = await AsyncStorage.getItem(storageKey);
+                const latestData = JSON.parse(latest || '{}');
+                latestData.data = latestData.data.map((i: any) => i.id === subscriptionId ? enhancedItem : i);
+                console.log('====================================');
+                console.log(latestData);
+                console.log('====================================');
+                await AsyncStorage.setItem(storageKey, JSON.stringify(latestData));
+                setData(latestData.data);
+                await syncNotificationBatch(enhancedItem, days);
+            });
+        } else {
+            // Standard update (date/price/cycle)
+            await AsyncStorage.setItem(storageKey, JSON.stringify({ ...storageData, data: updatedList }));
+            await syncNotificationBatch(updatedItem, days);
+        }
     } catch (e) {
-        console.error("Update Error", e);
+        console.error("Update Error:", e);
     }
 };
 
@@ -327,3 +356,13 @@ return (
 }
 
 export const useData = () => useContext(RetrieveData);
+
+
+export const calculateTotalMonthly = (subscriptions: Subscription[]): number => {
+  return subscriptions.reduce((total, sub) => {
+    let monthlyPrice = sub.price;
+    if (sub.cycle === 'weekly') monthlyPrice = sub.price * 4;
+    if (sub.cycle === 'yearly') monthlyPrice = sub.price / 12;
+    return total + monthlyPrice;
+  }, 0);
+};

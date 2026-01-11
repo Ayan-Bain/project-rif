@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { WEB_CLIENT_ID } from '@env'
 import { 
   GoogleSignin, 
   statusCodes, 
@@ -15,7 +16,7 @@ import {
 } from '@react-native-firebase/auth';
 
 GoogleSignin.configure({
-    webClientId: '924988303048-5grleknnej9l2chrm11mdaviua17q5nd.apps.googleusercontent.com',
+    webClientId: WEB_CLIENT_ID,
     scopes: ['profile', 'email'],
 });
 

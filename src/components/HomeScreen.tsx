@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo } from 'react';
-import { Modal, StatusBar, View, Text, StyleSheet, ActivityIndicator, FlatList, TouchableOpacity, Alert, useColorScheme } from 'react-native';
+import { Modal, StatusBar, View, Text, StyleSheet, ActivityIndicator, FlatList, TouchableOpacity, Alert, useColorScheme, Image, useWindowDimensions } from 'react-native';
 import { useAuth } from './services/AuthHandler';
 import { useData } from './services/RetrieveData';
 import AccountStatus from './AccountStatus';
@@ -11,14 +11,19 @@ import Subscription from '../subscriptions/subsciption';
 import renewalDate from './services/RenewalDate';
 import { Colors } from './constants/Colors';
 import MoreMenu from './partials/MoreMenu';
+import UniversalLogoHandler from './partials/UniversalLogoHandler';
 
 const HomeScreen: React.FC=  () => {
     const [selectedItem, setSelectedItem] = React.useState<Subscription | undefined>(undefined);
     const { isLoading, user,signIn} = useAuth();
     const [addSubscription, setAddSubscription] = React.useState<boolean>(false);
     const [menuVisible, setMenuVisible] = React.useState<boolean>(false);
+    const [details, setDetails] = React.useState<boolean>(false);
+    const [selectedId, setSelectedId] = React.useState<Subscription | null>(null);
+    const [logo, setLogo] = React.useState<string | null>(null);
     const [moreMenuVisible, setMoreMenuVisible] = React.useState<boolean>(false);
     const {data, retrieve, deleteSubscription, themeMode, update} = useData();
+    const windowWidth = useWindowDimensions().width;
         const systemScheme = useColorScheme(); //
         const theme =
           Colors[themeMode === "system" ? systemScheme || "light" : themeMode];
@@ -76,7 +81,6 @@ const HomeScreen: React.FC=  () => {
   try {
     await update(user.uid, sub.id, partial);
     // 5. Refresh data locally so the FlatList re-sorts immediately
-    retrieve(user.uid); 
     Alert.alert("Success", `${sub.name} marked as paid. Next renewal: ${nextDate}`);
     
   } catch (error) {
@@ -179,6 +183,12 @@ const HomeScreen: React.FC=  () => {
                   </View>
                 }
                 renderItem={({ item, index }) => (
+                  <TouchableOpacity onPress={()=>
+                  {
+                    setDetails(true);
+                    setSelectedId(item)
+                  }
+                  }>
                   <View
                     style={[
                       styles.rowContainer,
@@ -187,8 +197,16 @@ const HomeScreen: React.FC=  () => {
                           index % 2 == 0
                             ? "transparent"
                             : theme.whiteBackground,
-                            borderColor: isOverdue(renewalDate(item.date, item.cycle))?'red':null,
-                            borderWidth: isOverdue(renewalDate(item.date, item.cycle))?1:0
+                        borderColor: isOverdue(
+                          renewalDate(item.date, item.cycle)
+                        )
+                          ? "red"
+                          : null,
+                        borderWidth: isOverdue(
+                          renewalDate(item.date, item.cycle)
+                        )
+                          ? 1
+                          : 0,
                       },
                     ]}
                   >
@@ -254,6 +272,7 @@ const HomeScreen: React.FC=  () => {
                       </TouchableOpacity>
                     </View>
                   </View>
+                  </TouchableOpacity>
                 )}
               />
             ) : (
@@ -377,6 +396,36 @@ const HomeScreen: React.FC=  () => {
               </TouchableOpacity>
             </View>
           </TouchableOpacity>
+        </Modal>
+
+        <Modal visible={details} onRequestClose={()=>
+          {
+            setDetails(false);
+            setSelectedId(null);
+          }
+          } animationType='fade' transparent={true}>
+          <View
+            style={{
+              flex: 1,
+              justifyContent: "flex-end",
+              backgroundColor: "rgba(0,0,0,0.3)",
+            }}
+          >
+            <TouchableOpacity
+              style={{ flex: 1 }}
+              onPress={() => 
+              {
+                setDetails(false);
+                setSelectedId(null);
+              }
+              }
+            ></TouchableOpacity>
+            <View style={{ height: "70%", backgroundColor: !isDark?theme.whiteBackground:theme.background, paddingTop: '10%',alignItems: 'center' }}>
+              <UniversalLogoHandler uri={selectedId?.logo} size={500}/>
+              {/* This is not working */}
+            </View>
+          </View>
+
         </Modal>
 
         <MoreMenu visible={moreMenuVisible} setVisible={setMoreMenuVisible} />
