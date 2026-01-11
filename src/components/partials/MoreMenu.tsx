@@ -204,7 +204,9 @@ const MoreMenu: React.FC<props> = ({visible, setVisible}) => {
               </View>
             </View>
             <View>
-                <Text style={{color: theme.text, textAlign: 'center', paddingBottom: '10%', fontWeight:'600'}}>{`\u00A9 Ayan & Co. All rights reserved.`}</Text>
+                <Text style={{color: theme.text, textAlign: 'center', fontWeight:'600', fontSize: 16}}>Developer Contact Information</Text>
+                <Text style={{color: theme.text, textAlign: 'center', paddingBottom: '15%', fontWeight:'400'}}>ayanbain07@gmail.com</Text>
+                <Text style={{color: theme.text, textAlign: 'center', paddingBottom: '30%', fontWeight:'600', fontSize: 16}}>{`\u00A9 Ayan & Co. All rights reserved.`}</Text>
             </View>
           </View>
         </View>

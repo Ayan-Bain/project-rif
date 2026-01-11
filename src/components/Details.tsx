@@ -12,6 +12,9 @@ import { PieChart } from 'react-native-chart-kit';
 import { useData } from './services/RetrieveData';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from './constants/Colors';
+import MoreMenu from './partials/MoreMenu';
+import CustomButton from './custom-components/CustomButton';
+import AccountStatus from './AccountStatus';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -19,8 +22,10 @@ const Details = () => {
   const { data, themeMode } = useData();
   const systemScheme = useColorScheme();
   const theme = Colors[themeMode === "system" ? systemScheme || "light" : themeMode];
+      const activeTheme = themeMode === 'system' ? systemScheme : themeMode;
+      const isDark = activeTheme === 'dark';
   const [selectedIndustry, setSelectedIndustry] = useState<string | null>(null);
-
+  const [moreMenuVisible, setMoreMenuVisible] = React.useState<boolean>(false);
   const handleIndustryClick = (industryName: string) => {
   // If the same industry is clicked again, we toggle it off
   setSelectedIndustry((prev) => (prev === industryName ? null : industryName));
@@ -65,6 +70,24 @@ const industryBreakdown = useMemo(() => {
   return (
     <View style={{ flex: 1, backgroundColor: theme.background }}>
       <SafeAreaView style={{ flex: 1 }}>
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "stretch",
+            backgroundColor: theme.background,
+            marginHorizontal: "3%",
+          }}
+        >
+          <CustomButton
+            iconName="menu-outline"
+            backgroundColor={theme.background}
+            iconSize={30}
+            color={isDark ? null : "black"}
+            onPress={() => setMoreMenuVisible(true)}
+          />
+          <AccountStatus />
+        </View>
         <ScrollView contentContainerStyle={styles.scrollContainer}>
           <View style={styles.headerSection}>
             <Text style={[styles.title, { color: theme.text }]}>
@@ -154,6 +177,7 @@ const industryBreakdown = useMemo(() => {
   </View>
 )}
         </ScrollView>
+        <MoreMenu visible={moreMenuVisible} setVisible={setMoreMenuVisible}/>
       </SafeAreaView>
     </View>
   );

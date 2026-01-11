@@ -421,8 +421,29 @@ const HomeScreen: React.FC=  () => {
               }
             ></TouchableOpacity>
             <View style={{ height: "70%", backgroundColor: !isDark?theme.whiteBackground:theme.background, paddingTop: '10%',alignItems: 'center' }}>
-              <UniversalLogoHandler uri={selectedId?.logo} size={500}/>
-              {/* This is not working */}
+              <View style={{backgroundColor: 'white', borderRadius: 20}}>
+              <UniversalLogoHandler uri={selectedId?.logo} alt={selectedId?.name}/>
+              </View>
+              <View style={{paddingTop: 30, padding: 10, flexDirection: 'row', justifyContent: 'space-between', width: '100%', alignItems: 'center'}}>
+                <Text style={{color: theme.text, textAlign: 'center', fontSize: 20}}>Subscription Name: </Text>
+                <Text style={{color: theme.text, textAlign: 'center', fontSize: 30, fontWeight: '800', letterSpacing: 3}}>{selectedId?.name}</Text>
+              </View>
+              <View style={{padding: 10, flexDirection: 'row', justifyContent: 'space-between', width: '100%', alignItems: 'center'}}>
+                <Text style={{color: theme.text, textAlign: 'center', fontSize: 20}}>Subscription Renewal Date: </Text>
+                <Text style={{color: theme.text, textAlign: 'center', fontSize: 25, fontWeight: '800'}}>{selectedId?.date ? renewalDate( selectedId?.date, selectedId?.cycle): 'N/A'}</Text>
+              </View>
+              <View style={{padding: 10, flexDirection: 'row', justifyContent: 'space-between', width: '100%', alignItems: 'center'}}>
+                <Text style={{color: theme.text, textAlign: 'center', fontSize: 20}}>Subscription Renewal Cycle: </Text>
+                <Text style={{color: theme.text, textAlign: 'center', fontSize: 25, fontWeight: '800'}}>{selectedId?.cycle.charAt(0).toUpperCase()+selectedId?.cycle.slice(1)}</Text>
+              </View>
+              <View style={{padding: 15, flexDirection: 'row', justifyContent: 'space-between', width: '100%', alignItems: 'center'}}>
+                <Text style={{color: theme.text, textAlign: 'center', fontSize: 20}}>Subscription Price: </Text>
+                <Text style={{color: theme.text, textAlign: 'center', fontSize: 25, fontWeight: '800'}}>₹{selectedId?.price}</Text>
+              </View>
+              <View style={{padding: 15, justifyContent: 'space-between', width: '100%', alignItems: 'center'}}>
+                <Text style={{color: theme.text, textAlign: 'center', fontSize: 25}}>Subscription Category: </Text>
+                <Text style={{color: theme.text, textAlign: 'center', fontSize: 20, fontWeight: '600', paddingTop: 15}}>{selectedId?.category.replaceAll('-',' ').charAt(0).toUpperCase()+selectedId?.category.replaceAll('-',' ').slice(1)}</Text>
+              </View>
             </View>
           </View>
 
