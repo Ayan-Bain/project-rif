@@ -21,7 +21,7 @@ const AddSubscriptionForm: React.FC<Props> = ({editingItem, onComplete}) => {
   const [isAutoPayOn, setIsAutoPayOn] = React.useState<boolean>(false);
   const [dateInfo, setDateInfo] = useState(editingItem ? new Date(editingItem.date) : new Date());
   const [showPicker, setShowPicker] = useState(false);
-  const systemScheme = useColorScheme(); //
+  const systemScheme = useColorScheme();
   const theme = Colors[themeMode === 'system' ? (systemScheme || 'light') : themeMode];
   const activeTheme = themeMode === 'system' ? systemScheme : themeMode;
   const isDark = activeTheme === 'dark';
@@ -41,8 +41,6 @@ const AddSubscriptionForm: React.FC<Props> = ({editingItem, onComplete}) => {
             cycle,
             isAutoPayOn
         };
-
-        // logic to save would go here (update context + AsyncStorage)
         if(editingItem) {
             console.log("Updating Subscription", newSub);
             await update?.(user.uid, editingItem.id,newSub);
@@ -53,14 +51,9 @@ const AddSubscriptionForm: React.FC<Props> = ({editingItem, onComplete}) => {
         }
 
         onComplete?.();
-        // Alert.alert("Success", "Subscription added!");
     };
 
-
-
-    // Handles the selection from the native modal
     const onChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
-        // On Android, the picker closes immediately after selection
         if (Platform.OS === 'android') {
             setShowPicker(false);
         }
@@ -98,7 +91,7 @@ const AddSubscriptionForm: React.FC<Props> = ({editingItem, onComplete}) => {
                 onPress={() => setShowPicker(true)}
             >
                 <Text style={[styles.dateText, {color: theme.text}]}>
-                    {dateInfo.toLocaleDateString()} {/* Formats based on user locale */}
+                    {dateInfo.toLocaleDateString()}
                 </Text>
             </TouchableOpacity>
             <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-evenly'}}>
@@ -113,7 +106,6 @@ const AddSubscriptionForm: React.FC<Props> = ({editingItem, onComplete}) => {
             <Text style={{justifyContent: 'center', marginBottom: -10, color: theme.text, fontSize: 18}}>Off</Text>
             </View>
 
-            {/* The actual Picker component */}
             {showPicker && (
                 <DateTimePicker
                     value={dateInfo}
@@ -121,11 +113,9 @@ const AddSubscriptionForm: React.FC<Props> = ({editingItem, onComplete}) => {
                     mode="date"
                     display={Platform.OS === 'ios' ? 'inline' : 'default'}
                     onChange={onChange}
-                    maximumDate={new Date()} // Prevents picking future dates
+                    maximumDate={new Date()}
                 />
             )}
-
-            {/* iOS specific: Inline pickers don't auto-close, so you might need a "Done" button */}
             {Platform.OS === 'ios' && showPicker && (
                 <CustomButton 
                     title="Done" 

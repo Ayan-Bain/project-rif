@@ -45,7 +45,7 @@ const UniversalLogoHandler: React.FC<logoProps> = ({ uri, size = 150, alt }) => 
                 />
             ) : (
                 <Image 
-                    source={{ uri: uri }} 
+                    source={{ uri: darken(uri) }} 
                     style={{ 
                         width: displayWidth, 
                         height: displayHeight,

@@ -14,7 +14,7 @@ export const Colors = {
     text: '#E0E0E0',
     card: '#1E1E1E',
     header: '#FFFFFF',
-    zebra: '#1A2E2C', // Darker teal for zebra stripes
+    zebra: '#1A2E2C',
     border: '#333',
   }
 };

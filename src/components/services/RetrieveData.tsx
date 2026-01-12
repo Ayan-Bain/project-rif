@@ -91,15 +91,20 @@ const setDays = async (mode: number) => {
                 }
                 await AsyncStorage.setItem(getStorageKey(uid), JSON.stringify(tempData));
                 setData(tempData.data);
+                console.log('====================================');
+                console.log("Retrieved data from null storage");
+                console.log('====================================');
             }
             else {
                 const storageData = JSON.parse(await AsyncStorage.getItem(getStorageKey(uid)));
                 if(uid === null) {
                     if (storageData.uid === null) {
                         setData(storageData.data);
+                        console.log('====================================');
+                        console.log("Received data from storage");
+                        console.log('====================================');
                     }
                     else {
-                        // setData(storageData.data);
                         console.error('Manual error: In storage UID!=null but request comes from UID=null');
                     }
                 }
@@ -125,7 +130,7 @@ const setDays = async (mode: number) => {
         const newData: Subscription = {
             ...input,
             id: Date.now().toString(),
-            category: 'other', // Placeholder
+            category: 'other',
             logo: null,
         };
         const optimisticList = [...(storageData.data || []), newData];
@@ -141,7 +146,13 @@ const setDays = async (mode: number) => {
             console.log(latestStorage);
             console.log('====================================');
             await AsyncStorage.setItem(storageKey, JSON.stringify(latestStorage));
-            setData(latestStorage);
+            setData(current => {
+        if (!current) return [finalData];
+        return current.map(item => item.id === newData.id ? finalData : item);
+        console.log('====================================');
+        console.log("Set new data");
+        console.log('====================================');
+    });
             await syncNotificationBatch(finalData, days);
         }).catch(async () => {
             await syncNotificationBatch(newData, days);
@@ -158,6 +169,9 @@ const deleteSubscription = async (uid: uidType,id: string ) => {
         for (const notifId of oldIds) {
             await Notifications.cancelScheduledNotificationAsync(notifId);
         }
+        console.log('====================================');
+        console.log("Removed old notifs");
+        console.log('====================================');
     }
         const jsonString = await AsyncStorage.getItem(getStorageKey(uid));
         if(!jsonString) return;
@@ -190,18 +204,15 @@ const deleteSubscription = async (uid: uidType,id: string ) => {
         const storageData = JSON.parse(jsonString);
         const originalItem = storageData.data.find((i: Subscription) => i.id === subscriptionId);
         
-        // 1. Optimistic Update (UI)
         const updatedItem = { ...originalItem, ...updatedFields };
         const updatedList = storageData.data.map((item: Subscription) =>
             item.id === subscriptionId ? updatedItem : item
         );
         setData(updatedList);
 
-        // 2. If name changed, trigger background metadata refresh
         if (updatedFields.name !== originalItem.name) {
             getBrandMetadata(updatedFields.name).then(async (metadata) => {
                 const enhancedItem = { ...updatedItem, ...metadata };
-                // Update storage with enhanced metadata
                 const latest = await AsyncStorage.getItem(storageKey);
                 const latestData = JSON.parse(latest || '{}');
                 latestData.data = latestData.data.map((i: any) => i.id === subscriptionId ? enhancedItem : i);
@@ -213,7 +224,6 @@ const deleteSubscription = async (uid: uidType,id: string ) => {
                 await syncNotificationBatch(enhancedItem, days);
             });
         } else {
-            // Standard update (date/price/cycle)
             await AsyncStorage.setItem(storageKey, JSON.stringify({ ...storageData, data: updatedList }));
             await syncNotificationBatch(updatedItem, days);
         }

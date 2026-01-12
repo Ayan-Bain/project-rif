@@ -44,4 +44,7 @@ export const syncNotificationBatch = async (sub: Subscription, daysBefore: numbe
   }
 
   await NotificationRegistry.saveNotifIds(sub.id, newIds);
+  console.log('====================================');
+  console.log("Set notifications");
+  console.log('====================================');
 };

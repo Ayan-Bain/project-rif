@@ -24,7 +24,7 @@ const HomeScreen: React.FC=  () => {
     const [moreMenuVisible, setMoreMenuVisible] = React.useState<boolean>(false);
     const {data, retrieve, deleteSubscription, themeMode, update} = useData();
     const windowWidth = useWindowDimensions().width;
-        const systemScheme = useColorScheme(); //
+        const systemScheme = useColorScheme();
         const theme =
           Colors[themeMode === "system" ? systemScheme || "light" : themeMode];
       const activeTheme = themeMode === 'system' ? systemScheme : themeMode;
@@ -74,12 +74,11 @@ const HomeScreen: React.FC=  () => {
       name: sub.name,
       price: sub.price,
       cycle: sub.cycle,
-      date: nextDate, // This is now the new renewal date
+      date: nextDate,
     };
 
     try {
       await update(user.uid, sub.id, partial);
-      // 5. Refresh data locally so the FlatList re-sorts immediately
       Alert.alert(
         "Success",
         `${sub.name} marked as paid. Next renewal: ${nextDate}`
@@ -131,10 +130,8 @@ const HomeScreen: React.FC=  () => {
             {data && data.length > 0 ? (
               <FlatList
                 data={sortedData}
-                // keyExtractor={(item) => item.id}
                 ListHeaderComponent={
                   <View style={styles.tableContainer}>
-                    {/* Action Button */}
                     <View style={styles.buttonWrapper}>
                       <CustomButton
                         title="Add Subscription"
@@ -184,96 +181,114 @@ const HomeScreen: React.FC=  () => {
                   </View>
                 }
                 renderItem={({ item, index }) => (
-                  <TouchableOpacity onPress={()=>
-                  {
-                    setDetails(true);
-                    setSelectedId(item)
-                  }
-                  }>
-                  <View
-                    style={[
-                      styles.rowContainer,
-                      {
-                        backgroundColor:
-                          index % 2 == 0
-                            ? "transparent"
-                            : theme.whiteBackground,
-                        borderColor: isOverdue(
-                          renewalDate(item.date, item.cycle)
-                        )
-                          ? "red"
-                          : null,
-                        borderWidth: isOverdue(
-                          renewalDate(item.date, item.cycle)
-                        )
-                          ? 1
-                          : 0,
-                      },
-                    ]}
+                  <TouchableOpacity
+                    onPress={() => {
+                      setDetails(true);
+                      setSelectedId(item);
+                    }}
                   >
-                    <Text
-                      style={[styles.cellText, { flex: 2, color: theme.text }]}
-                      numberOfLines={1}
-                    >
-                      {item.name}
-                    </Text>
-                    <Text
-                      style={[
-                        styles.cellText,
-                        { flex: 2.5, color: theme.text },
-                      ]}
-                    >
-                      {renewalDate(item.date, item.cycle)}
-                    </Text>
-                    <Text
-                      style={[
-                        styles.cellText,
-                        { flex: 1.5, color: theme.text, fontSize: 14, marginLeft: 10 },
-                      ]}
-                    >
-                      {item.cycle.charAt(0).toUpperCase() + item.cycle.slice(1)}
-                    </Text>
-                    <Text
-                      style={[styles.cellText, { flex: 2, color: theme.text }]}
-                    >
-                      {item.price}
-                    </Text>
                     <View
-                      style={{
-                        flex: 1.5,
-                        marginRight: 30,
-                        flexDirection: "row",
-                        justifyContent: "space-between",
-                      }}
+                      style={[
+                        styles.rowContainer,
+                        {
+                          backgroundColor:
+                            index % 2 == 0
+                              ? "transparent"
+                              : theme.whiteBackground,
+                          borderColor: isOverdue(
+                            renewalDate(item.date, item.cycle)
+                          )
+                            ? "red"
+                            : null,
+                          borderWidth: isOverdue(
+                            renewalDate(item.date, item.cycle)
+                          )
+                            ? 1
+                            : 0,
+                        },
+                      ]}
                     >
-                      <TouchableOpacity
-                        onPress={() => {
-                          onMarkPaid(item);
-                        }}
-                        style={{ padding: 0, alignItems: 'center', marginRight: 10 }}
+                      <Text
+                        style={[
+                          styles.cellText,
+                          { flex: 2, color: theme.text },
+                        ]}
+                        numberOfLines={1}
                       >
-                        <Ionicons
-                          name="checkmark"
-                          size={25}
-                          color={isDark ? "#FFFFFF" : "#555"}
-                        />
-                        <Text style={{fontSize: 10, textAlign: 'center'}}>Mark as paid</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        onPress={() => {
-                          setSelectedItem(item);
-                          setMenuVisible(true);
-                        }}
-                        style={{ padding: 5 }}
+                        {item.name}
+                      </Text>
+                      <Text
+                        style={[
+                          styles.cellText,
+                          { flex: 2.5, color: theme.text },
+                        ]}
                       >
-                        <Ionicons
-                          name="ellipsis-vertical"
-                          size={25}
-                          color={isDark ? "#FFFFFF" : "#555"}
-                        />
-                      </TouchableOpacity>
+                        {renewalDate(item.date, item.cycle)}
+                      </Text>
+                      <Text
+                        style={[
+                          styles.cellText,
+                          {
+                            flex: 1.5,
+                            color: theme.text,
+                            fontSize: 14,
+                            marginLeft: 10,
+                          },
+                        ]}
+                      >
+                        {item.cycle.charAt(0).toUpperCase() +
+                          item.cycle.slice(1)}
+                      </Text>
+                      <Text
+                        style={[
+                          styles.cellText,
+                          { flex: 2, color: theme.text },
+                        ]}
+                      >
+                        {item.price}
+                      </Text>
+                      <View
+                        style={{
+                          flex: 1.5,
+                          marginRight: 30,
+                          flexDirection: "row",
+                          justifyContent: "space-between",
+                        }}
+                      >
+                        <TouchableOpacity
+                          onPress={() => {
+                            onMarkPaid(item);
+                          }}
+                          style={{
+                            padding: 0,
+                            alignItems: "center",
+                            marginRight: 10,
+                          }}
+                        >
+                          <Ionicons
+                            name="checkmark"
+                            size={25}
+                            color={isDark ? "#FFFFFF" : "#555"}
+                          />
+                          <Text style={{ fontSize: 10, textAlign: "center" }}>
+                            Mark as paid
+                          </Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          onPress={() => {
+                            setSelectedItem(item);
+                            setMenuVisible(true);
+                          }}
+                          style={{ padding: 5 }}
+                        >
+                          <Ionicons
+                            name="ellipsis-vertical"
+                            size={25}
+                            color={isDark ? "#FFFFFF" : "#555"}
+                          />
+                        </TouchableOpacity>
+                      </View>
                     </View>
-                  </View>
                   </TouchableOpacity>
                 )}
               />
@@ -360,7 +375,6 @@ const HomeScreen: React.FC=  () => {
         </Modal>
 
         <Modal visible={menuVisible} transparent={true} animationType="fade">
-          {/* Transparent overlay to close menu when clicking outside */}
           <TouchableOpacity
             style={styles.modalOverlay}
             activeOpacity={1}
@@ -400,12 +414,15 @@ const HomeScreen: React.FC=  () => {
           </TouchableOpacity>
         </Modal>
 
-        <Modal visible={details} onRequestClose={()=>
-          {
+        <Modal
+          visible={details}
+          onRequestClose={() => {
             setDetails(false);
             setSelectedId(null);
-          }
-          } animationType='fade' transparent={true}>
+          }}
+          animationType="fade"
+          transparent={true}
+        >
           <View
             style={{
               flex: 1,
@@ -415,41 +432,186 @@ const HomeScreen: React.FC=  () => {
           >
             <TouchableOpacity
               style={{ flex: 1 }}
-              onPress={() => 
-              {
+              onPress={() => {
                 setDetails(false);
                 setSelectedId(null);
-              }
-              }
+              }}
             ></TouchableOpacity>
-            <View style={{ height: "70%", backgroundColor: !isDark?theme.whiteBackground:theme.background, paddingTop: '10%',alignItems: 'center' }}>
-              <View style={{backgroundColor: 'white', borderRadius: 20}}>
-              <UniversalLogoHandler uri={selectedId?.logo} alt={selectedId?.name}/>
+            <View
+              style={{
+                height: "70%",
+                backgroundColor: !isDark
+                  ? theme.whiteBackground
+                  : theme.background,
+                paddingTop: "10%",
+                alignItems: "center",
+              }}
+            >
+              <View style={{ backgroundColor: "white", borderRadius: 20 }}>
+                <UniversalLogoHandler
+                  uri={selectedId?.logo}
+                  alt={selectedId?.name}
+                />
               </View>
-              <View style={{paddingTop: 30, padding: 10, flexDirection: 'row', justifyContent: 'space-between', width: '100%', alignItems: 'center'}}>
-                <Text style={{color: theme.text, textAlign: 'center', fontSize: 20}}>Subscription Name: </Text>
-                <Text style={{color: theme.text, textAlign: 'center', fontSize: 30, fontWeight: '800', letterSpacing: 3}}>{selectedId?.name}</Text>
+              <View
+                style={{
+                  paddingTop: 30,
+                  padding: 10,
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  width: "100%",
+                  alignItems: "center",
+                }}
+              >
+                <Text
+                  style={{
+                    color: theme.text,
+                    textAlign: "center",
+                    fontSize: 20,
+                  }}
+                >
+                  Subscription Name:{" "}
+                </Text>
+                <Text
+                  style={{
+                    color: theme.text,
+                    textAlign: "center",
+                    fontSize: 30,
+                    fontWeight: "800",
+                    letterSpacing: 3,
+                  }}
+                >
+                  {selectedId?.name}
+                </Text>
               </View>
-              <View style={{padding: 10, flexDirection: 'row', justifyContent: 'space-between', width: '100%', alignItems: 'center'}}>
-                <Text style={{color: theme.text, textAlign: 'center', fontSize: 20}}>Last Paid Date: </Text>
-                <Text style={{color: theme.text, textAlign: 'center', fontSize: 25, fontWeight: '800'}}>{selectedId?.date}</Text>
+              <View
+                style={{
+                  padding: 10,
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  width: "100%",
+                  alignItems: "center",
+                }}
+              >
+                <Text
+                  style={{
+                    color: theme.text,
+                    textAlign: "center",
+                    fontSize: 20,
+                  }}
+                >
+                  Last Paid Date:{" "}
+                </Text>
+                <Text
+                  style={{
+                    color: theme.text,
+                    textAlign: "center",
+                    fontSize: 25,
+                    fontWeight: "800",
+                  }}
+                >
+                  {selectedId?.date}
+                </Text>
               </View>
-              <View style={{padding: 10, flexDirection: 'row', justifyContent: 'space-between', width: '100%', alignItems: 'center'}}>
-                <Text style={{color: theme.text, textAlign: 'center', fontSize: 20}}>Subscription Renewal Cycle: </Text>
-                <Text style={{color: theme.text, textAlign: 'center', fontSize: 25, fontWeight: '800'}}>{selectedId?.cycle.charAt(0).toUpperCase()+selectedId?.cycle.slice(1)}</Text>
+              <View
+                style={{
+                  padding: 10,
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  width: "100%",
+                  alignItems: "center",
+                }}
+              >
+                <Text
+                  style={{
+                    color: theme.text,
+                    textAlign: "center",
+                    fontSize: 20,
+                  }}
+                >
+                  Subscription Renewal Cycle:{" "}
+                </Text>
+                <Text
+                  style={{
+                    color: theme.text,
+                    textAlign: "center",
+                    fontSize: 25,
+                    fontWeight: "800",
+                  }}
+                >
+                  {selectedId?.cycle.charAt(0).toUpperCase() +
+                    selectedId?.cycle.slice(1)}
+                </Text>
               </View>
-              <View style={{padding: 15, flexDirection: 'row', justifyContent: 'space-between', width: '100%', alignItems: 'center'}}>
-                <Text style={{color: theme.text, textAlign: 'center', fontSize: 20}}>Subscription Price: </Text>
-                <Text style={{color: theme.text, textAlign: 'center', fontSize: 25, fontWeight: '800'}}>₹{selectedId?.price}</Text>
+              <View
+                style={{
+                  padding: 15,
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  width: "100%",
+                  alignItems: "center",
+                }}
+              >
+                <Text
+                  style={{
+                    color: theme.text,
+                    textAlign: "center",
+                    fontSize: 20,
+                  }}
+                >
+                  Subscription Price:{" "}
+                </Text>
+                <Text
+                  style={{
+                    color: theme.text,
+                    textAlign: "center",
+                    fontSize: 25,
+                    fontWeight: "800",
+                  }}
+                >
+                  ₹{selectedId?.price}
+                </Text>
               </View>
-              <View style={{padding: 15, justifyContent: 'space-between', width: '100%', alignItems: 'center'}}>
-                <Text style={{color: theme.text, textAlign: 'center', fontSize: 25}}>Subscription Category: </Text>
-                <Text style={{color: theme.text, textAlign: 'center', fontSize: 20, fontWeight: '600', paddingTop: 15}}>{selectedId?.category.replaceAll('-',' ').charAt(0).toUpperCase()+selectedId?.category.replaceAll('-',' ').slice(1)}</Text>
+              <View
+                style={{
+                  padding: 15,
+                  justifyContent: "space-between",
+                  width: "100%",
+                  alignItems: "center",
+                }}
+              >
+                <Text
+                  style={{
+                    color: theme.text,
+                    textAlign: "center",
+                    fontSize: 25,
+                  }}
+                >
+                  Subscription Category:{" "}
+                </Text>
+                <Text
+                  style={{
+                    color: theme.text,
+                    textAlign: "center",
+                    fontSize: 20,
+                    fontWeight: "600",
+                    paddingTop: 15,
+                  }}
+                >
+                  {selectedId?.category
+                    .replaceAll("-", " ")
+                    .charAt(0)
+                    .toUpperCase() +
+                    selectedId?.category.replaceAll("-", " ").slice(1)}
+                </Text>
               </View>
-              <CustomButton title='Mark as Paid' backgroundColor='green' onPress={()=>onMarkPaid(selectedId)}/>
+              <CustomButton
+                title="Mark as Paid"
+                backgroundColor="green"
+                onPress={() => onMarkPaid(selectedId)}
+              />
             </View>
           </View>
-
         </Modal>
 
         <MoreMenu visible={moreMenuVisible} setVisible={setMoreMenuVisible} />
@@ -460,8 +622,6 @@ const HomeScreen: React.FC=  () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        // justifyContent: 'center',
-        // alignItems: 'center',
     },
     tableContainer: {
     width: '100%',
@@ -471,19 +631,16 @@ const styles = StyleSheet.create({
     paddingRight: "5%",
     marginVertical: 10,
   },
-  // This shared style is the secret to perfect alignment
   rowContainer: {
     flexDirection: "row",
     paddingHorizontal: '2%',
     paddingVertical: 12,
-    // borderBottomWidth: 1,
     borderColor: '#eee',
     alignItems: 'center',
     justifyContent: 'center'
   },
   headerColumn: {
     fontWeight: 'bold',
-    fontSize: 20, // Reduced from 24 to prevent overlap on smaller screens
     textAlign: 'center',
     color: '#333',
   },
@@ -494,7 +651,7 @@ const styles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.2)', // Dim the background slightly
+    backgroundColor: 'rgba(0,0,0,0.2)',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -503,12 +660,10 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderRadius: 12,
     padding: 5,
-    // Shadow for iOS
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
-    // Elevation for Android
     elevation: 5,
   },
   menuOption: {

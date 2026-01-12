@@ -37,7 +37,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const auth = getAuth();
         const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
             setUser(firebaseUser);
-            setIsLoading(false); //
+            setIsLoading(false); 
         });
         return () => unsubscribe();
     }, []);
@@ -73,7 +73,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const signOut = async () => {
         try {
             const auth = getAuth();
-            await firebaseSignOut(auth); //
+            await firebaseSignOut(auth);
             await GoogleSignin.signOut();
         } catch (error) {
             console.log("Sign out error:", error);
