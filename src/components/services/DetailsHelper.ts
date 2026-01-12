@@ -7,7 +7,6 @@ interface props  {
 
 export const getBrandMetadata = async (name: string): Promise<props> => {
   try {
-    // 1. Fetch domain from Logo.dev Search API
     const logoResponse = await fetch(`https://api.logo.dev/search?q=${name}`, {
       method: 'GET',
       headers: { Authorization: `Bearer ${LOGO_SECRET_KEY}` }

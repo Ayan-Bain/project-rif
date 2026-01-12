@@ -13,7 +13,7 @@ const MoreMenu: React.FC<props> = ({visible, setVisible}) => {
     const {user} = useAuth();
     const {themeMode, toggleTheme, isCloudSyncOn, setCloudSyncOn, days, setDays} = useData();
 
-    const systemScheme = useColorScheme(); //
+    const systemScheme = useColorScheme();
             const theme =
               Colors[
                 themeMode === "system" ? systemScheme || "light" : themeMode
@@ -69,9 +69,9 @@ const MoreMenu: React.FC<props> = ({visible, setVisible}) => {
                   Toggle Cloud Sync
                 </Text>
                 <Switch
-                  trackColor={{ false: "#767577", true: "#81b0ff" }} // Colors for the "track"
-                  thumbColor={isCloudSyncOn ? "#2196F3" : "#f4f3f4"} // Color for the moving "circle"
-                  onValueChange={() => setCloudSyncOn(!isCloudSyncOn)} // Toggles the state
+                  trackColor={{ false: "#767577", true: "#81b0ff" }}
+                  thumbColor={isCloudSyncOn ? "#2196F3" : "#f4f3f4"}
+                  onValueChange={() => setCloudSyncOn(!isCloudSyncOn)}
                   value={isCloudSyncOn}
                 />
               </View>
@@ -80,7 +80,6 @@ const MoreMenu: React.FC<props> = ({visible, setVisible}) => {
                   flexDirection: "row",
                   marginTop: 50,
                   justifyContent: "space-between",
-                  // width: "100%",
                   paddingHorizontal: 20,
                 }}
               >
@@ -100,7 +99,6 @@ const MoreMenu: React.FC<props> = ({visible, setVisible}) => {
                     },
                   ]}
                 >
-                  {/* Light Mode Button */}
                   <TouchableOpacity
                     onPress={() => toggleTheme("light")}
                     style={[
@@ -115,7 +113,6 @@ const MoreMenu: React.FC<props> = ({visible, setVisible}) => {
                     />
                   </TouchableOpacity>
 
-                  {/* Dark Mode Button */}
                   <TouchableOpacity
                     onPress={() => toggleTheme("dark")}
                     style={[
@@ -130,7 +127,6 @@ const MoreMenu: React.FC<props> = ({visible, setVisible}) => {
                     />
                   </TouchableOpacity>
 
-                  {/* System Default Button */}
                   <TouchableOpacity
                     onPress={() => toggleTheme("system")}
                     style={[
@@ -151,7 +147,6 @@ const MoreMenu: React.FC<props> = ({visible, setVisible}) => {
                   flexDirection: "row",
                   marginTop: 50,
                   justifyContent: "space-between",
-                  // width: "100%",
                   paddingHorizontal: 20,
                 }}
               >
@@ -180,8 +175,6 @@ const MoreMenu: React.FC<props> = ({visible, setVisible}) => {
                   >
                     <Text style={{color: themeMode === "light" ? "#2196F3" : "#888"}}>3</Text>
                   </TouchableOpacity>
-
-                  {/* Dark Mode Button */}
                   <TouchableOpacity
                     onPress={() => setDays(5)}
                     style={[
@@ -225,7 +218,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#eee',
     borderRadius: 20,
     padding: 2,
-    // marginTop: 10,
     width: 120,
     justifyContent: 'space-between'
   },
@@ -236,7 +228,7 @@ const styles = StyleSheet.create({
     alignItems: 'center'
   },
   activeBtn: {
-    backgroundColor: '#fff', // "Pops" out the active selection
+    backgroundColor: '#fff',
     elevation: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },

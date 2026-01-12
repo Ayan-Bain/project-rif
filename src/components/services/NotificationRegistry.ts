@@ -7,29 +7,26 @@ const NOTIF_MAP_KEY = '@device_notification_map';
 export const NotificationRegistry = {
   getNotifIds: async (subId: string) => {
     const map = await AsyncStorage.getItem('@device_notification_map');
-    return map ? JSON.parse(map)[subId] : []; // Return empty array if none
+    return map ? JSON.parse(map)[subId] : [];
   },
   saveNotifIds: async (subId: string, ids: string[]) => {
     const map = await AsyncStorage.getItem('@device_notification_map') || '{}';
     const parsed = JSON.parse(map);
-    parsed[subId] = ids; // Store the whole array
+    parsed[subId] = ids;
     await AsyncStorage.setItem('@device_notification_map', JSON.stringify(parsed));
   }
 };
 
 
 export const requestNotificationPermission = async () => {
-  // 1. Get current permission status
   const { status: existingStatus } = await Notifications.getPermissionsAsync();
   let finalStatus = existingStatus;
 
-  // 2. Only ask if permissions haven't been determined yet
   if (existingStatus !== 'granted') {
     const { status } = await Notifications.requestPermissionsAsync();
     finalStatus = status;
   }
 
-  // 3. If the user denied permission, show an alert with a link to settings
   if (finalStatus !== 'granted') {
     Alert.alert(
       'Notifications Disabled',
@@ -42,7 +39,6 @@ export const requestNotificationPermission = async () => {
     return false;
   }
 
-  // 4. Android-specific: Create a notification channel (Required for Android 8.0+)
   if (Platform.OS === 'android') {
     await Notifications.setNotificationChannelAsync('default', {
       name: 'default',

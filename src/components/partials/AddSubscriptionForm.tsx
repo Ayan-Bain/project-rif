@@ -66,7 +66,7 @@ const AddSubscriptionForm: React.FC<Props> = ({editingItem, onComplete}) => {
     return (
         <View style={[styles.container,{backgroundColor: theme.whiteBackground, flex: 1}]}>
           <Text style={{textAlign: 'center', fontWeight: 'bold', fontSize: 24, color: theme.text}}>{editingItem? 'Edit Subscription': 'Add new Subscription'}</Text>
-            <Text style={[styles.label, {color: theme.text}]}>Subscription Name</Text>
+            <Text style={[styles.label, {color: theme.text}]}>Subscription Full Name</Text>
             <TextInput 
                 style={[styles.input, {color: theme.text}]} 
                 placeholder="e.g. Netflix" 

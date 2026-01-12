@@ -10,7 +10,7 @@ const AccountStatus: React.FC=  () => {
     const {user, isLoading, signIn, signOut} = useAuth();
     const {download, themeMode, data} = useData();
 
-    const systemScheme = useColorScheme(); //
+    const systemScheme = useColorScheme(); 
     const theme = Colors[themeMode === 'system' ? (systemScheme || 'light') : themeMode];
 
 if(isLoading) {
@@ -61,7 +61,6 @@ if(isLoading) {
               flex: 1,
               backgroundColor: "rgba(0,0,0,0.3)",
               justifyContent: "flex-end",
-              //   alignItems: "center",
             }}
           >
             <TouchableOpacity

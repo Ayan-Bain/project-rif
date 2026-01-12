@@ -10,9 +10,8 @@ import { Colors } from './src/components/constants/Colors';
 
 const Tab = createBottomTabNavigator();
 
-// 1. Move the Tab logic into its own component
 function AppNavigator() {
-  const { themeMode } = useData(); // Now this works because it's a child of DataProvider
+  const { themeMode } = useData();
   const systemScheme = useColorScheme();
   
   const activeTheme = themeMode === "system" ? (systemScheme || "light") : themeMode;
@@ -24,7 +23,6 @@ const isDark = activeTheme === 'dark';
         initialRouteName="My Subscriptions"
         screenOptions={{
           headerShown: false,
-          // Use tabBarStyle instead of tabBarBackground for simple color changes
           tabBarStyle: {
             backgroundColor: theme.whiteBackground,
             borderTopColor: theme.border,
@@ -56,7 +54,6 @@ const isDark = activeTheme === 'dark';
   );
 }
 
-// 2. Keep App.js clean as the top-level Provider
 export default function App() {
   return (
     <AuthProvider>

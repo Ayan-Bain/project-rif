@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo } from 'react';
 import { Modal, StatusBar, View, Text, StyleSheet, ActivityIndicator, FlatList, TouchableOpacity, Alert, useColorScheme, Image, useWindowDimensions } from 'react-native';
+import {useFonts} from 'expo-font'
 import { useAuth } from './services/AuthHandler';
 import { useData } from './services/RetrieveData';
 import AccountStatus from './AccountStatus';
@@ -30,6 +31,17 @@ const HomeScreen: React.FC=  () => {
       const activeTheme = themeMode === 'system' ? systemScheme : themeMode;
       const isDark = activeTheme === 'dark';
 
+      const [fontsLoaded] = useFonts({
+        'Berkshire': require('../../assets/fonts/Berkshire_Swash/BerkshireSwash-Regular.ttf'),
+        'Acme': require('../../assets/fonts/Acme/Acme-Regular.ttf'),
+        'Bree': require('../../assets/fonts/Bree_Serif/BreeSerif-Regular.ttf'),
+        'Amaranth': require('../../assets/fonts/Amaranth/Amaranth-Bold.ttf'),
+        'Caveat': require('../../assets/fonts/Caveat/static/Caveat-Medium.ttf'),
+        'Crete': require('../../assets/fonts/Crete_Round/CreteRound-Italic.ttf'),
+        'Garamond': require('../../assets/fonts/EB_Garamond/static/EBGaramond-Regular.ttf'),
+        'Exo': require('../../assets/fonts/Exo_2/static/Exo2-MediumItalic.ttf')
+      })
+
     useEffect(()=> {
       setSelectedItem(undefined);
       if(user) {
@@ -39,29 +51,37 @@ const HomeScreen: React.FC=  () => {
         retrieve(null);
       }
     },[user])
+
     
-            const sortedData = useMemo(() => {
-              if(!data) return;
-        return [...data].sort((a, b) => {
-          return new Date(renewalDate(a.date, a.cycle)).getTime() - new Date(renewalDate(b.date, b.cycle)).getTime();
+    const sortedData = useMemo(() => {
+      if(!data) return;
+      return [...data].sort((a, b) => {
+        return new Date(renewalDate(a.date, a.cycle)).getTime() - new Date(renewalDate(b.date, b.cycle)).getTime();
         });
       }, [data]);
-    if(isLoading) {
+      if(isLoading) {
         return(
-            <SafeAreaView style={[styles.container,{justifyContent: 'center', backgroundColor: theme.background}]}>
+          <SafeAreaView style={[styles.container,{justifyContent: 'center', backgroundColor: theme.background}]}>
                 <StatusBar barStyle="dark-content" />
                 <ActivityIndicator size={100}/>
             </SafeAreaView>
         )
-    };
-
-    const isOverdue = (date: string): boolean => {
-      return (new Date(date).getTime() < new Date().setHours(0,0,0,0));
-    }
-
-    const openEdit = (item: Subscription) => {
-      setSelectedItem(item);
-      setAddSubscription(true);
+      };
+      
+      if(!fontsLoaded) {
+        return (
+          <View style={{backgroundColor: theme.background, justifyContent: 'center'}}>
+            <ActivityIndicator size={100}/>
+          </View>
+        )
+      }
+      const isOverdue = (date: string): boolean => {
+        return (new Date(date).getTime() < new Date().setHours(0,0,0,0));
+      }
+      
+      const openEdit = (item: Subscription) => {
+        setSelectedItem(item);
+        setAddSubscription(true);
     }
 
   const onMarkPaid = async (sub: Subscription) => {
@@ -158,7 +178,7 @@ const HomeScreen: React.FC=  () => {
                           { flex: 2.5, color: theme.text },
                         ]}
                       >
-                        Renewal date
+                        Renewal Date
                       </Text>
                       <Text
                         style={[
@@ -174,9 +194,13 @@ const HomeScreen: React.FC=  () => {
                           { flex: 2, color: theme.text },
                         ]}
                       >
-                        Price
+                        Price (Rs.)
                       </Text>
-                      <View style={{ flex: 1.7 }} />
+                      <Text
+                        style={[styles.headerColumn, { color: theme.text, flex: 2.5 }]}
+                      >
+                        Accessibility
+                      </Text>
                     </View>
                   </View>
                 }
@@ -211,7 +235,7 @@ const HomeScreen: React.FC=  () => {
                       <Text
                         style={[
                           styles.cellText,
-                          { flex: 2, color: theme.text },
+                          { flex: 2, color: theme.text, fontFamily: 'Acme' },
                         ]}
                         numberOfLines={1}
                       >
@@ -220,7 +244,7 @@ const HomeScreen: React.FC=  () => {
                       <Text
                         style={[
                           styles.cellText,
-                          { flex: 2.5, color: theme.text },
+                          { flex: 2.5, color: theme.text, fontFamily: 'Crete' },
                         ]}
                       >
                         {renewalDate(item.date, item.cycle)}
@@ -233,6 +257,7 @@ const HomeScreen: React.FC=  () => {
                             color: theme.text,
                             fontSize: 14,
                             marginLeft: 10,
+                            fontFamily: 'Bree'
                           },
                         ]}
                       >
@@ -242,7 +267,7 @@ const HomeScreen: React.FC=  () => {
                       <Text
                         style={[
                           styles.cellText,
-                          { flex: 2, color: theme.text },
+                          { flex: 2, color: theme.text, fontFamily: 'Exo' },
                         ]}
                       >
                         {item.price}
@@ -270,8 +295,15 @@ const HomeScreen: React.FC=  () => {
                             size={25}
                             color={isDark ? "#FFFFFF" : "#555"}
                           />
-                          <Text style={{ fontSize: 10, textAlign: "center" }}>
-                            Mark as paid
+                          <Text
+                            style={{
+                              fontSize: 12,
+                              textAlign: "center",
+                              color: theme.text,
+                              fontFamily: 'Garamond',
+                            }}
+                          >
+                            Mark as Paid
                           </Text>
                         </TouchableOpacity>
                         <TouchableOpacity
@@ -445,6 +477,7 @@ const HomeScreen: React.FC=  () => {
                   : theme.background,
                 paddingTop: "10%",
                 alignItems: "center",
+                paddingHorizontal: '5%'
               }}
             >
               <View style={{ backgroundColor: "white", borderRadius: 20 }}>
@@ -467,18 +500,19 @@ const HomeScreen: React.FC=  () => {
                   style={{
                     color: theme.text,
                     textAlign: "center",
-                    fontSize: 20,
+                    fontSize: 25,
+                    fontFamily: 'Amaranth'
                   }}
                 >
-                  Subscription Name:{" "}
+                  Subscription Name:
                 </Text>
                 <Text
                   style={{
                     color: theme.text,
                     textAlign: "center",
-                    fontSize: 30,
-                    fontWeight: "800",
+                    fontSize: 35,
                     letterSpacing: 3,
+                    fontFamily: 'Caveat'
                   }}
                 >
                   {selectedId?.name}
@@ -498,16 +532,17 @@ const HomeScreen: React.FC=  () => {
                     color: theme.text,
                     textAlign: "center",
                     fontSize: 20,
+                    fontFamily: 'Amaranth'
                   }}
                 >
-                  Last Paid Date:{" "}
+                  Last Paid Date:
                 </Text>
                 <Text
                   style={{
                     color: theme.text,
                     textAlign: "center",
-                    fontSize: 25,
-                    fontWeight: "800",
+                    fontSize: 30,
+                    fontFamily: 'Caveat'
                   }}
                 >
                   {selectedId?.date}
@@ -527,16 +562,17 @@ const HomeScreen: React.FC=  () => {
                     color: theme.text,
                     textAlign: "center",
                     fontSize: 20,
+                    fontFamily: 'Amaranth'
                   }}
                 >
-                  Subscription Renewal Cycle:{" "}
+                  Subscription Renewal Cycle:
                 </Text>
                 <Text
                   style={{
                     color: theme.text,
                     textAlign: "center",
-                    fontSize: 25,
-                    fontWeight: "800",
+                    fontSize: 30,
+                    fontFamily: 'Caveat'
                   }}
                 >
                   {selectedId?.cycle.charAt(0).toUpperCase() +
@@ -557,16 +593,17 @@ const HomeScreen: React.FC=  () => {
                     color: theme.text,
                     textAlign: "center",
                     fontSize: 20,
+                    fontFamily: 'Amaranth'
                   }}
                 >
-                  Subscription Price:{" "}
+                  Subscription Price:
                 </Text>
                 <Text
                   style={{
                     color: theme.text,
                     textAlign: "center",
-                    fontSize: 25,
-                    fontWeight: "800",
+                    fontSize: 30,
+                    fontFamily: 'Caveat'
                   }}
                 >
                   ₹{selectedId?.price}
@@ -585,17 +622,18 @@ const HomeScreen: React.FC=  () => {
                     color: theme.text,
                     textAlign: "center",
                     fontSize: 25,
+                    fontFamily: 'Amaranth'
                   }}
                 >
-                  Subscription Category:{" "}
+                  Subscription Category:
                 </Text>
                 <Text
                   style={{
                     color: theme.text,
                     textAlign: "center",
-                    fontSize: 20,
-                    fontWeight: "600",
+                    fontSize: 35,
                     paddingTop: 15,
+                    fontFamily: 'Caveat'
                   }}
                 >
                   {selectedId?.category
@@ -640,7 +678,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center'
   },
   headerColumn: {
-    fontWeight: 'bold',
+    fontFamily: 'Berkshire',
+    fontSize: 18,
     textAlign: 'center',
     color: '#333',
   },

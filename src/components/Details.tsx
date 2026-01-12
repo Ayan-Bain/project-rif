@@ -27,18 +27,15 @@ const Details = () => {
   const [selectedIndustry, setSelectedIndustry] = useState<string | null>(null);
   const [moreMenuVisible, setMoreMenuVisible] = React.useState<boolean>(false);
   const handleIndustryClick = (industryName: string) => {
-  // If the same industry is clicked again, we toggle it off
   setSelectedIndustry((prev) => (prev === industryName ? null : industryName));
 };
 
-    // INSERT THIS AFTER handleIndustryClick (around Line 27)
 const industryBreakdown = useMemo(() => {
   if (!selectedIndustry || !data) return [];
   
-  // We must normalize the category names to match the "spaced" version in your chart
   return data.filter((sub) => {
     const categorySlug = sub.category || "other";
-    const categoryName = categorySlug.replace(/-/g, " "); // This turns 'video-streaming' into 'video streaming'
+    const categoryName = categorySlug.replace(/-/g, " ");
     return categoryName.toLowerCase() === selectedIndustry.toLowerCase();
   });
 }, [selectedIndustry, data]);
@@ -61,7 +58,6 @@ const industryBreakdown = useMemo(() => {
       name: key.replace(/-/g, ' '), 
       population: parseFloat(totals[key].toFixed(2)),
       color: colors[i % colors.length],
-      // We still keep these for internal chart logic, but the legend is manual now
     }));
   }, [data]);
 
@@ -103,17 +99,15 @@ const industryBreakdown = useMemo(() => {
               height={220}
               accessor={"population"}
               backgroundColor={"transparent"}
-              paddingLeft={(screenWidth / 4).toString()} // Centers the circle since legend is gone
+              paddingLeft={(screenWidth / 4).toString()}
               center={[0, 0]}
-              hasLegend={false} // Disable the default side legend
+              hasLegend={false}
               chartConfig={{ color: (opacity = 1) => theme.text }}
             />
           </View>
 
-          {/* Custom Legend Section Below the Chart */}
           <View style={styles.legendContainer}>
             {chartData.map((item, index) => {
-              // Check if this specific item is currently selected
               const isSelected = selectedIndustry === item.name;
 
               return (
@@ -121,7 +115,6 @@ const industryBreakdown = useMemo(() => {
                   key={index}
                   style={[
                     styles.legendItem,
-                    // Add a subtle background highlight if selected
                     isSelected && {
                       backgroundColor: theme.whiteBackground,
                       borderRadius: 10,
@@ -160,7 +153,6 @@ const industryBreakdown = useMemo(() => {
     </Text>
     
     {industryBreakdown.map((sub) => {
-      // Calculate the specific monthly impact of this one sub
       let monthly = sub.price;
       if (sub.cycle === 'weekly') monthly = sub.price * 4.33;
       if (sub.cycle === 'yearly') monthly = sub.price / 12;
@@ -193,13 +185,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20, 
     marginTop: 20,
     flexDirection: 'row',
-    flexWrap: 'wrap', // Allows legend to wrap to new lines
+    flexWrap: 'wrap',
     justifyContent: 'space-between'
   },
   legendItem: { 
     flexDirection: 'row', 
     alignItems: 'center', 
-    width: '48%', // Show items in two columns
+    width: '48%',
     marginBottom: 15 
   },
   colorDot: { width: 20, height: 20, borderRadius: 10, marginRight: 8 },
@@ -211,7 +203,6 @@ const styles = StyleSheet.create({
     marginTop: 20,
     padding: 20,
     borderRadius: 15,
-    // Add a slight shadow for depth
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
