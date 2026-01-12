@@ -8,6 +8,7 @@ interface Subscription {
     cycle: cycle;
     category?: string;
     logo?: string;
+    isAutoPayOn?: boolean;
 }
 
 export default Subscription;

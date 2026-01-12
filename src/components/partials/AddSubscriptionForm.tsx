@@ -18,6 +18,7 @@ const AddSubscriptionForm: React.FC<Props> = ({editingItem, onComplete}) => {
   const [name, setName] = useState(editingItem?.name || '');
   const [price, setPrice] = useState(editingItem?.price.toString() || '');
   const [cycle, setCycle] = useState(editingItem?.cycle || 'monthly');
+  const [isAutoPayOn, setIsAutoPayOn] = React.useState<boolean>(false);
   const [dateInfo, setDateInfo] = useState(editingItem ? new Date(editingItem.date) : new Date());
   const [showPicker, setShowPicker] = useState(false);
   const systemScheme = useColorScheme(); //
@@ -38,6 +39,7 @@ const AddSubscriptionForm: React.FC<Props> = ({editingItem, onComplete}) => {
             price: parseFloat(price),
             date,
             cycle,
+            isAutoPayOn
         };
 
         // logic to save would go here (update context + AsyncStorage)
@@ -99,6 +101,17 @@ const AddSubscriptionForm: React.FC<Props> = ({editingItem, onComplete}) => {
                     {dateInfo.toLocaleDateString()} {/* Formats based on user locale */}
                 </Text>
             </TouchableOpacity>
+            <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-evenly'}}>
+            <Text style={[styles.label, {color: theme.text}]}>AutoPay: </Text>
+            <TouchableOpacity style={{marginBottom: -10}} onPress={()=>setIsAutoPayOn(true)}>
+                <View style={{height: 25, width: 25, borderRadius: 20, backgroundColor: isAutoPayOn?'#c0d317':theme.whiteBackground, marginLeft: 50, borderColor: theme.text, borderWidth: 2}}></View>
+            </TouchableOpacity>
+            <Text style={{justifyContent: 'center', marginBottom: -10, color: theme.text, fontSize: 18}}>On</Text>
+            <TouchableOpacity style={{marginBottom: -10}} onPress={()=>setIsAutoPayOn(false)}>
+                <View style={{height: 25, width: 25, borderRadius: 20, backgroundColor: !isAutoPayOn?'#c0d317':theme.whiteBackground, marginLeft: 50, borderColor: theme.text, borderWidth: 2}}></View>
+            </TouchableOpacity>
+            <Text style={{justifyContent: 'center', marginBottom: -10, color: theme.text, fontSize: 18}}>Off</Text>
+            </View>
 
             {/* The actual Picker component */}
             {showPicker && (

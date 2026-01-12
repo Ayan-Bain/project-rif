@@ -65,29 +65,30 @@ const HomeScreen: React.FC=  () => {
     }
 
   const onMarkPaid = async (sub: Subscription) => {
-  console.log('Marking as paid:', sub.name);
-  
-  const nextDate = renewalDate(sub.date, sub.cycle);
-  const updatedSub = { ...sub, date: nextDate };
-   
+    console.log("Marking as paid:", sub.name);
 
-  const partial = {
-    name: sub.name, 
-    price: sub.price, 
-    cycle: sub.cycle,
-    date: nextDate // This is now the new renewal date
+    const nextDate = renewalDate(sub.date, sub.cycle);
+    const updatedSub = { ...sub, date: nextDate };
+
+    const partial = {
+      name: sub.name,
+      price: sub.price,
+      cycle: sub.cycle,
+      date: nextDate, // This is now the new renewal date
+    };
+
+    try {
+      await update(user.uid, sub.id, partial);
+      // 5. Refresh data locally so the FlatList re-sorts immediately
+      Alert.alert(
+        "Success",
+        `${sub.name} marked as paid. Next renewal: ${nextDate}`
+      );
+    } catch (error) {
+      console.error("Update failed:", error);
+      Alert.alert("Error", "Could not update subscription.");
+    }
   };
-
-  try {
-    await update(user.uid, sub.id, partial);
-    // 5. Refresh data locally so the FlatList re-sorts immediately
-    Alert.alert("Success", `${sub.name} marked as paid. Next renewal: ${nextDate}`);
-    
-  } catch (error) {
-    console.error("Update failed:", error);
-    Alert.alert("Error", "Could not update subscription.");
-  }
-};
 
     const handleOptionsMenu = (item: Subscription) => {
           Alert.alert(
@@ -178,7 +179,7 @@ const HomeScreen: React.FC=  () => {
                       >
                         Price
                       </Text>
-                      <View style={{ flex: 1 }} />
+                      <View style={{ flex: 1.7 }} />
                     </View>
                   </View>
                 }
@@ -227,7 +228,7 @@ const HomeScreen: React.FC=  () => {
                     <Text
                       style={[
                         styles.cellText,
-                        { flex: 1.5, color: theme.text },
+                        { flex: 1.5, color: theme.text, fontSize: 14, marginLeft: 10 },
                       ]}
                     >
                       {item.cycle.charAt(0).toUpperCase() + item.cycle.slice(1)}
@@ -239,8 +240,8 @@ const HomeScreen: React.FC=  () => {
                     </Text>
                     <View
                       style={{
-                        flex: 1,
-                        marginRight: 10,
+                        flex: 1.5,
+                        marginRight: 30,
                         flexDirection: "row",
                         justifyContent: "space-between",
                       }}
@@ -249,13 +250,14 @@ const HomeScreen: React.FC=  () => {
                         onPress={() => {
                           onMarkPaid(item);
                         }}
-                        style={{ padding: 5 }}
+                        style={{ padding: 0, alignItems: 'center', marginRight: 10 }}
                       >
                         <Ionicons
                           name="checkmark"
                           size={25}
                           color={isDark ? "#FFFFFF" : "#555"}
                         />
+                        <Text style={{fontSize: 10, textAlign: 'center'}}>Mark as paid</Text>
                       </TouchableOpacity>
                       <TouchableOpacity
                         onPress={() => {
@@ -429,8 +431,8 @@ const HomeScreen: React.FC=  () => {
                 <Text style={{color: theme.text, textAlign: 'center', fontSize: 30, fontWeight: '800', letterSpacing: 3}}>{selectedId?.name}</Text>
               </View>
               <View style={{padding: 10, flexDirection: 'row', justifyContent: 'space-between', width: '100%', alignItems: 'center'}}>
-                <Text style={{color: theme.text, textAlign: 'center', fontSize: 20}}>Subscription Renewal Date: </Text>
-                <Text style={{color: theme.text, textAlign: 'center', fontSize: 25, fontWeight: '800'}}>{selectedId?.date ? renewalDate( selectedId?.date, selectedId?.cycle): 'N/A'}</Text>
+                <Text style={{color: theme.text, textAlign: 'center', fontSize: 20}}>Last Paid Date: </Text>
+                <Text style={{color: theme.text, textAlign: 'center', fontSize: 25, fontWeight: '800'}}>{selectedId?.date}</Text>
               </View>
               <View style={{padding: 10, flexDirection: 'row', justifyContent: 'space-between', width: '100%', alignItems: 'center'}}>
                 <Text style={{color: theme.text, textAlign: 'center', fontSize: 20}}>Subscription Renewal Cycle: </Text>
@@ -444,6 +446,7 @@ const HomeScreen: React.FC=  () => {
                 <Text style={{color: theme.text, textAlign: 'center', fontSize: 25}}>Subscription Category: </Text>
                 <Text style={{color: theme.text, textAlign: 'center', fontSize: 20, fontWeight: '600', paddingTop: 15}}>{selectedId?.category.replaceAll('-',' ').charAt(0).toUpperCase()+selectedId?.category.replaceAll('-',' ').slice(1)}</Text>
               </View>
+              <CustomButton title='Mark as Paid' backgroundColor='green' onPress={()=>onMarkPaid(selectedId)}/>
             </View>
           </View>
 

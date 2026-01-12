@@ -5,7 +5,7 @@ import { useAuth } from './AuthHandler';
 import Subscription from '../../subscriptions/subsciption';
 import { Alert } from 'react-native';
 import { syncNotificationBatch } from './NotificationManager';
-import { NotificationRegistry } from './NotificationRegistry';
+import { NotificationRegistry, requestNotificationPermission } from './NotificationRegistry';
 import * as Notifications from 'expo-notifications'
 import { getBrandMetadata } from './DetailsHelper';
 type uidType = null | string;
@@ -14,6 +14,7 @@ interface dataInputTypePrimitive{
     date: string;
     cycle: cycleType;
     price: number;
+    isAutoPayOn?: boolean
 }
 
 type dataInputType = null | dataInputTypePrimitive;
@@ -125,7 +126,7 @@ const setDays = async (mode: number) => {
             ...input,
             id: Date.now().toString(),
             category: 'other', // Placeholder
-            logo: null
+            logo: null,
         };
         const optimisticList = [...(storageData.data || []), newData];
         setData(optimisticList);
@@ -246,26 +247,30 @@ const download = async (uid: uidType) => {
         if (docu.exists) {
             const cloudData = docu.data()?.subscriptions || [];
             const key = getStorageKey(uid);
-            await AsyncStorage.setItem(key, JSON.stringify({uid, data: cloudData}));
             if(data.length>cloudData.length) {
                 Alert.alert(
-                  "Confirmation to overwrite local data",
-                  "Are you sure you want to overwrite local data with cloud data ?",
-                  [
-                    { text: "Cancel", style: "cancel" },
-                    {
-                      text: "Delete",
+                    "Confirmation to overwrite local data",
+                    "Are you sure you want to overwrite local data with cloud data ?",
+                    [
+                        { text: "Cancel", style: "cancel" },
+                        {
+                            text: "Delete",
                       style: "destructive",
                       onPress: () => {
-                            setData(cloudData);
-                            setCloudSyncOn(true);
-                            Alert.alert("Cloud Data downloaded successfully");            
-                      },
+                          setData(cloudData);
+                          setCloudSyncOn(true);
+                          Alert.alert("Cloud Data downloaded successfully");            
+                        },
                     },
-                  ]
+                ]
                 );
             }
+            await AsyncStorage.setItem(key, JSON.stringify({uid, data: cloudData}));
             setData(cloudData);
+            await requestNotificationPermission();
+            for(const sub of cloudData) {
+                syncNotificationBatch(sub, days);
+            }
             setCloudSyncOn(true);
             Alert.alert('Cloud Data downloaded successfully');
         }

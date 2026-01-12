@@ -1,9 +1,7 @@
-// services/NotificationManager.ts
 import * as Notifications from 'expo-notifications';
 import { NotificationRegistry } from './NotificationRegistry';
 import Subscription from '../../subscriptions/subsciption';
 import renewalDate from './RenewalDate';
-import { useData } from './RetrieveData';
 
 Notifications.setNotificationHandler({
 handleNotification: async () => ({
@@ -23,13 +21,13 @@ export const syncNotificationBatch = async (sub: Subscription, daysBefore: numbe
   }
   const newIds: string[] = [];
   const [y, m, d] = renewalDate(sub.date, sub.cycle).split('-').map(Number);
-  const dueDate = new Date(y, m-1 , d, 18, 35, 0);
+  const dueDate = new Date(y, m-1 , d, 19, 0, 0);
   for (let i = daysBefore; i >= 0; i--) {
     const triggerDate = new Date(dueDate);
     triggerDate.setDate(dueDate.getDate() - i);
     if (triggerDate.getTime() > Date.now()) {
       const body = i === 0 
-        ? `${sub.name} is due TODAY!` 
+        ?(sub.isAutoPayOn?`Money will be DEDUCTED today for${sub.name}`:`${sub.name} is due TODAY!`) 
         : `${sub.name} is due in ${i} days.`;
       const id = await Notifications.scheduleNotificationAsync({
         content: {
