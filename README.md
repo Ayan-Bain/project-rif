@@ -4,7 +4,7 @@ Project-RIF is a modern mobile application built with **React Native** and **Exp
 
 ## ✨ Features
 
-- **Automated Brand Discovery**: Automatically fetches high-quality brand logos and categories (e.g., "Netflix" or "Tata Play") via the **Brandfetch API**.
+- **Automated Brand Discovery**: Automatically fetches high-quality brand logos and categories via the **Brandfetch API**.
 - **Universal Logo Support**: A custom `UniversalLogoHandler` component that seamlessly renders both **SVG** and **PNG** assets.
 - **Cloud Synchronization**: Optional **Firebase** integration allowing users to backup and sync their data across multiple devices.
 - **Smart Notifications**: Automatically schedules push reminders for upcoming renewals based on custom cycles (Weekly, Monthly, Yearly) via `expo-notifications`.
