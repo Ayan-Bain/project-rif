@@ -141,6 +141,7 @@ const setDays = async (mode: number) => {
             console.log(latestStorage);
             console.log('====================================');
             await AsyncStorage.setItem(storageKey, JSON.stringify(latestStorage));
+            setData(latestStorage);
             await syncNotificationBatch(finalData, days);
         }).catch(async () => {
             await syncNotificationBatch(newData, days);
