@@ -29,4 +29,6 @@ Project-RIF is a modern mobile application built with **React Native** and **Exp
 1. **Clone the repository**:
    ```bash
    git clone [https://github.com/Ayan-Bain/project-rif.git](https://github.com/Ayan-Bain/project-rif.git)
-   cd Project-RIF
+   cd Project-rif
+   #Add .env file and populate it
+   npx expo run:android
