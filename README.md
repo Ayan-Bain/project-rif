@@ -17,7 +17,6 @@ Project-RIF is a modern mobile application built with **React Native** and **Exp
 - **Database & Auth**: [Firebase](https://firebase.google.com/) (Authentication & Firestore)
 - **Graphics**: [react-native-svg](https://github.com/software-mansion/react-native-svg) for vector rendering
 - **Storage**: [@react-native-async-storage/async-storage](https://react-native-async-storage.github.io/async-storage/)
-- **Secrets Management**: EAS Secrets and `react-native-dotenv`
 
 ## 🚀 Getting Started
 
