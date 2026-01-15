@@ -21,10 +21,8 @@ const HomeScreen: React.FC=  () => {
     const [menuVisible, setMenuVisible] = React.useState<boolean>(false);
     const [details, setDetails] = React.useState<boolean>(false);
     const [selectedId, setSelectedId] = React.useState<Subscription | null>(null);
-    const [logo, setLogo] = React.useState<string | null>(null);
     const [moreMenuVisible, setMoreMenuVisible] = React.useState<boolean>(false);
     const {data, retrieve, deleteSubscription, themeMode, update} = useData();
-    const windowWidth = useWindowDimensions().width;
         const systemScheme = useColorScheme();
         const theme =
           Colors[themeMode === "system" ? systemScheme || "light" : themeMode];
