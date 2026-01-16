@@ -12,7 +12,7 @@ shouldSetBadge: false,
 }),
 });
 
-export const syncNotificationBatch = async (sub: Subscription, daysBefore: number) => {
+export const syncNotificationBatch = async (sub: Subscription, daysBefore: number, displayName: string) => {
   const oldIds = await NotificationRegistry.getNotifIds(sub.id);
   if (oldIds && Array.isArray(oldIds)) {
     for (const id of oldIds) {
@@ -27,8 +27,8 @@ export const syncNotificationBatch = async (sub: Subscription, daysBefore: numbe
     triggerDate.setDate(dueDate.getDate() - i);
     if (triggerDate.getTime() > Date.now()) {
       const body = i === 0 
-        ?(sub.isAutoPayOn?`Money will be DEDUCTED today for${sub.name}`:`${sub.name} is due TODAY!`) 
-        : `${sub.name} is due in ${i} days.`;
+        ?(`${displayName} Hurry !!!`+sub.isAutoPayOn?`Money will be DEDUCTED today for${sub.name}`:`Hey ${displayName}, ${sub.name} is due TODAY!`) 
+        : `Hey ${displayName}, ${sub.name} is due in ${i} days.`;
       const id = await Notifications.scheduleNotificationAsync({
         content: {
           title: "Subscription Reminder 💳",
@@ -40,11 +40,11 @@ export const syncNotificationBatch = async (sub: Subscription, daysBefore: numbe
           date: triggerDate },
       });
       newIds.push(id);
+      console.log('====================================');
+      console.log("Set notification at", triggerDate.toISOString().split('T')[0], "at", triggerDate.toISOString().split('T')[1]);
+      console.log('====================================');
     }
   }
 
   await NotificationRegistry.saveNotifIds(sub.id, newIds);
-  console.log('====================================');
-  console.log("Set notifications");
-  console.log('====================================');
 };

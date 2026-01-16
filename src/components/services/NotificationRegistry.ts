@@ -2,8 +2,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Notifications from 'expo-notifications';
 import { Alert, Platform, Linking } from 'react-native';
 
-const NOTIF_MAP_KEY = '@device_notification_map';
-
 export const NotificationRegistry = {
   getNotifIds: async (subId: string) => {
     const map = await AsyncStorage.getItem('@device_notification_map');

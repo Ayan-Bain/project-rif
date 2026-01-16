@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, Alert, Platform, TouchableOpacity, useColorScheme } from 'react-native';
 import CustomButton from '../custom-components/CustomButton';
 import { useData } from '../services/RetrieveData';

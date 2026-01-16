@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, useColorScheme } from 'react-native';
+import {  ActivityIndicator, useColorScheme, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import HomeScreen from './src/components/HomeScreen';
@@ -11,12 +11,21 @@ import { Colors } from './src/components/constants/Colors';
 const Tab = createBottomTabNavigator();
 
 function AppNavigator() {
-  const { themeMode } = useData();
+  const { themeMode, loading } = useData();
   const systemScheme = useColorScheme();
   
   const activeTheme = themeMode === "system" ? (systemScheme || "light") : themeMode;
   const theme = Colors[activeTheme];
 const isDark = activeTheme === 'dark';
+
+  if(loading) {
+    return (
+      <View style={{flex: 1, justifyContent: 'center'}}>
+        <ActivityIndicator size={100}/>
+      </View>
+    )
+  }
+
   return (
     <NavigationContainer>
       <Tab.Navigator

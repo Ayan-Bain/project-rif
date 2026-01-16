@@ -40,8 +40,8 @@ const RetrieveData = createContext<RetriveDataType>({} as RetriveDataType);
 
 export const DataProvider: React.FC<{ children: React.ReactNode }> = ({children}) => {
     const {user} = useAuth();
-    const [data, setData] = React.useState<Subscription[]>();
-    const [loading, setLoading] = React.useState<boolean>(false);
+    const [data, setData] = React.useState<Subscription[]>([]);
+    const [loading, setLoading] = React.useState<boolean>(true);
     const [isCloudSyncOn, setCloudSync] = React.useState<boolean>(false);
     const [days, setDay] = React.useState<number>(3);
     const [themeMode, setTheme] = React.useState<'light' | 'dark' | 'system'>('system');
@@ -81,7 +81,6 @@ const setDays = async (mode: number) => {
 }
 
     const retrieve = async (uid: uidType) => {
-        setLoading(true);
         try {
             const storageData = await AsyncStorage.getItem(getStorageKey(uid));
             if(!storageData) {
@@ -117,12 +116,16 @@ const setDays = async (mode: number) => {
             console.error('Error in retrieving data', e);
         }
         finally {
-            setLoading(false);
+            setLoading(false)
         }
     }
 
     const save = async (uid: uidType, input: dataInputType) => {
-    if (!input) return;
+    setLoading(true)
+    if (!input)  {
+        setLoading(false)
+        return;
+    }
     try {
         const storageKey = getStorageKey(uid);
         const jsonString = await AsyncStorage.getItem(storageKey);
@@ -153,12 +156,15 @@ const setDays = async (mode: number) => {
         console.log("Set new data");
         console.log('====================================');
     });
-            await syncNotificationBatch(finalData, days);
+            await syncNotificationBatch(finalData, days, user.displayName);
         }).catch(async () => {
-            await syncNotificationBatch(newData, days);
+            await syncNotificationBatch(newData, days, user.displayName);
         });
     } catch (e) {
         console.error('Save Error:', e);
+    }
+    finally {
+        setLoading(false);
     }
 };
 
@@ -221,11 +227,11 @@ const deleteSubscription = async (uid: uidType,id: string ) => {
                 console.log('====================================');
                 await AsyncStorage.setItem(storageKey, JSON.stringify(latestData));
                 setData(latestData.data);
-                await syncNotificationBatch(enhancedItem, days);
+                await syncNotificationBatch(enhancedItem, days, user.displayName);
             });
         } else {
             await AsyncStorage.setItem(storageKey, JSON.stringify({ ...storageData, data: updatedList }));
-            await syncNotificationBatch(updatedItem, days);
+            await syncNotificationBatch(updatedItem, days, user.displayName);
         }
     } catch (e) {
         console.error("Update Error:", e);
@@ -280,7 +286,7 @@ const download = async (uid: uidType) => {
             setData(cloudData);
             await requestNotificationPermission();
             for(const sub of cloudData) {
-                syncNotificationBatch(sub, days);
+                await syncNotificationBatch(sub, days, user.displayName);
             }
             setCloudSyncOn(true);
             Alert.alert('Cloud Data downloaded successfully');
@@ -302,10 +308,16 @@ useEffect(() => {
   }
 }, [data, isCloudSyncOn]);
 useEffect(()=> {
-    if(user) {
-        save(user.uid, null);
+    const initData = async () => {
+        if(user) {
+            await retrieve(user.uid);
+        }
+        else {
+            await retrieve(null);
+        }
     }
-},[user])
+    initData();
+},[user?.uid])
 useEffect(()=> {
     const loadTheme = async ()=> {
         try {

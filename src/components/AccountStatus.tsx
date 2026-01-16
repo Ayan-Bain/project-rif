@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, Image, Modal, TouchableOpacity, Switch, useColorScheme } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, Image, Modal, TouchableOpacity, useColorScheme } from 'react-native';
 import { useAuth } from './services/AuthHandler';
 import CustomButton from './custom-components/CustomButton';
 import { useData } from './services/RetrieveData';
